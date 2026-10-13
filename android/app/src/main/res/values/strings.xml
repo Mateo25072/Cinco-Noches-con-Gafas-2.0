@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Cinco Noches con Gafas</string>
+    <string name="title_activity_main">Cinco Noches con Gafas</string>
+    <string name="package_name">com.cinconoches.gafas</string>
+    <string name="custom_url_scheme">com.cinconoches.gafas</string>
+</resources>

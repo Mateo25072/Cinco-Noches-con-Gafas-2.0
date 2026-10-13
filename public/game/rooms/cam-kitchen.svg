@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="wall" x2="0" y2="1">
+      <stop stop-color="#33302b"/>
+      <stop offset="1" stop-color="#151513"/>
+    </linearGradient>
+    <linearGradient id="floor" x2="0" y2="1">
+      <stop stop-color="#29241d"/>
+      <stop offset="1" stop-color="#090909"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop stop-color="#d5a957" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#d5a957" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="tile" width="84" height="56" patternUnits="userSpaceOnUse">
+      <path d="M0 0H84V56H0Z" fill="none" stroke="#726857" stroke-opacity=".22" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="540" fill="url(#wall)"/>
+  <path d="M0 520 1280 455V720H0Z" fill="url(#floor)"/>
+  <path d="M0 520 1280 455V720H0Z" fill="url(#tile)" opacity=".8"/>
+  <ellipse cx="660" cy="290" rx="380" ry="280" fill="url(#glow)"/>
+  <path d="M92 108h274v339H92z" fill="#171715" stroke="#70634d" stroke-width="8"/>
+  <path d="M112 130h234v290H112z" fill="#24221e"/>
+  <path d="M112 220h234M112 315h234" stroke="#80745e" stroke-width="9"/>
+  <g fill="#8b7956">
+    <rect x="130" y="157" width="52" height="48"/><rect x="198" y="157" width="64" height="48"/>
+    <rect x="275" y="157" width="54" height="48"/><rect x="143" y="246" width="72" height="55"/>
+    <rect x="236" y="246" width="91" height="55"/><rect x="128" y="340" width="60" height="50"/>
+    <rect x="209" y="340" width="57" height="50"/><rect x="284" y="340" width="45" height="50"/>
+  </g>
+  <path d="M478 90h340v314H478z" fill="#111211" stroke="#8a7653" stroke-width="9"/>
+  <path d="M500 116h296v260H500z" fill="#211f19"/>
+  <path d="M520 139h255M520 184h255" stroke="#76684d" stroke-width="5"/>
+  <g fill="#b59b67">
+    <path d="m542 150 25-20 27 20v29h-52z"/><path d="m618 150 23-20 25 20v29h-48z"/>
+    <path d="m694 150 24-20 25 20v29h-49z"/><path d="M530 197h55v34h-55z"/>
+    <path d="M602 197h55v34h-55z"/><path d="M674 197h94v34h-94z"/>
+  </g>
+  <path d="M425 464h525l75 83H355z" fill="#4c4030" stroke="#887251" stroke-width="8"/>
+  <path d="M401 548v116m566-116v116" stroke="#171513" stroke-width="25"/>
+  <path d="M0 0h1280v720H0z" fill="#030303" opacity=".24"/>
+  <path d="M0 0h1280v720H0z" fill="none" stroke="#000" stroke-width="70" opacity=".42"/>
+  <g fill="#d4bd87" opacity=".62" font-family="monospace">
+    <text x="34" y="54" font-size="20">CAM 10 // COCINA</text>
+    <text x="1020" y="54" font-size="15">REC 00:00:--</text>
+  </g>
+  <path d="M0 90h1280M0 360h1280M0 630h1280" stroke="#fff" stroke-opacity=".035" stroke-width="2"/>
+</svg>
