@@ -4,7 +4,9 @@ dist-android/
 .vercel/
 .tanstack/
 .grok/
-artifacts/
+artifacts/.tmp/
+artifacts/windows/win-unpacked/
+artifacts/windows/builder-debug.yml
 attachments/
 screenshots/*
 !.gitkeep
