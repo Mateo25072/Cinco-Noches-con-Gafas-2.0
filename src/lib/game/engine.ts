@@ -776,6 +776,15 @@ export class FnafEngine {
     if (this.tortoloRage >= rageMax) this.kill("tortolo");
   }
 
+  /** Sonido sintético de respaldo si el video del susto no carga. */
+  fallbackScream() {
+    this.audio.scream();
+  }
+
+  get sound() {
+    return this.audio;
+  }
+
   finishJumpscare() {
     if (this.phase !== "jumpscare") return;
     this.phase = "gameover";
@@ -796,7 +805,6 @@ export class FnafEngine {
     this.audio.stopMusicBox();
     this.audio.setScreamLoop(0);
     this.audio.camStatic(false);
-    this.audio.scream();
     this.emit();
   }
 

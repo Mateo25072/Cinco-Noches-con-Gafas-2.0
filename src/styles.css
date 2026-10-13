@@ -1115,3 +1115,24 @@ input {
 @media (max-height: 520px) and (orientation: portrait), (max-width: 480px) and (orientation: portrait) {
   .tablet-bezel { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
 }
+
+/* Susto: el video vertical se ve completo (sin recortes) sobre un fondo desenfocado */
+.jumpscare video {
+  animation: none;
+}
+.jumpscare .jumpscare-bg {
+  position: absolute;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  object-fit: cover;
+  filter: blur(18px) brightness(0.55);
+}
+.jumpscare .jumpscare-main {
+  position: relative;
+  object-fit: contain;
+  animation: scare 0.12s steps(2, end) infinite;
+}
+.reduce-motion .jumpscare .jumpscare-main {
+  animation: none;
+}

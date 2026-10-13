@@ -475,27 +475,61 @@ function Meter({
   );
 }
 
+const JUMP_SPEED = 2;
+
 function Jumpscare({ who, engine }: { who: ThreatId; engine: FnafEngine }) {
   const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const main = useRef<HTMLVideoElement>(null);
+  const back = useRef<HTMLVideoElement>(null);
   useEffect(
     () => () => {
       if (hold.current) clearTimeout(hold.current);
     },
     [],
   );
+  useEffect(() => {
+    const v = main.current;
+    const b = back.current;
+    if (!v) return;
+    v.muted = engine.sound.muted;
+    v.volume = 1;
+    v.playbackRate = JUMP_SPEED;
+    if (b) b.playbackRate = JUMP_SPEED;
+    const start = () => {
+      v.playbackRate = JUMP_SPEED;
+      if (b) {
+        b.playbackRate = JUMP_SPEED;
+        void b.play().catch(() => {});
+      }
+      v.play().catch(() => {
+        // Si el sistema bloquea el audio, reproducir al menos la imagen.
+        v.muted = true;
+        void v.play().catch(() => {});
+      });
+    };
+    if (v.readyState >= 2) start();
+    else v.addEventListener("loadeddata", start, { once: true });
+    return () => v.removeEventListener("loadeddata", start);
+  }, [engine, who]);
   const finishSoon = (ms: number) => {
     if (hold.current) clearTimeout(hold.current);
     hold.current = setTimeout(() => engine.finishJumpscare(), ms);
   };
   return (
     <div className="jumpscare">
+      <video ref={back} className="jumpscare-bg" src={JUMP_VIDEO[who]} muted playsInline aria-hidden="true" />
       <video
+        ref={main}
+        className="jumpscare-main"
         src={JUMP_VIDEO[who]}
         autoPlay
-        muted
         playsInline
-        onEnded={() => finishSoon(500)}
-        onError={() => finishSoon(1200)}
+        preload="auto"
+        onEnded={() => finishSoon(300)}
+        onError={() => {
+          engine.fallbackScream();
+          finishSoon(1200);
+        }}
       />
     </div>
   );
