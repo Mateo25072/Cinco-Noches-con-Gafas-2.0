@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="wall" x2="0" y2="1">
+      <stop stop-color="#272626"/>
+      <stop offset="1" stop-color="#111112"/>
+    </linearGradient>
+    <linearGradient id="floor" x2="0" y2="1">
+      <stop stop-color="#302b26"/>
+      <stop offset="1" stop-color="#080808"/>
+    </linearGradient>
+    <radialGradient id="lamp">
+      <stop stop-color="#adb8b0" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#adb8b0" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="68" height="54" patternUnits="userSpaceOnUse">
+      <path d="M0 0H68V54H0Z" fill="none" stroke="#9c9587" stroke-opacity=".15" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="518" fill="url(#wall)"/>
+  <path d="M0 518 1280 458V720H0Z" fill="url(#floor)"/>
+  <path d="M0 518 1280 458V720H0Z" fill="url(#grid)"/>
+  <ellipse cx="676" cy="247" rx="380" ry="260" fill="url(#lamp)"/>
+  <path d="M90 146h308v360H90z" fill="#101111" stroke="#615b50" stroke-width="8"/>
+  <path d="M112 168h264v310H112z" fill="#242321"/>
+  <path d="M112 270h264M112 372h264" stroke="#716958" stroke-width="9"/>
+  <g fill="#6f685a">
+    <rect x="128" y="185" width="91" height="70"/><rect x="236" y="185" width="121" height="70"/>
+    <rect x="132" y="290" width="68" height="72"/><rect x="216" y="290" width="145" height="72"/>
+    <rect x="128" y="391" width="113" height="69"/><rect x="257" y="391" width="102" height="69"/>
+  </g>
+  <path d="M503 112h560v366H503z" fill="#171817" stroke="#82765f" stroke-width="8"/>
+  <path d="M529 138h508v314H529z" fill="#20201e"/>
+  <path d="M529 234h508M529 343h508" stroke="#716653" stroke-width="9"/>
+  <g fill="#938364">
+    <rect x="552" y="154" width="120" height="64"/><rect x="690" y="154" width="147" height="64"/>
+    <rect x="853" y="154" width="158" height="64"/><rect x="550" y="255" width="192" height="71"/>
+    <rect x="761" y="255" width="128" height="71"/><rect x="908" y="255" width="105" height="71"/>
+    <rect x="553" y="363" width="140" height="65"/><rect x="712" y="363" width="177" height="65"/>
+    <rect x="908" y="363" width="104" height="65"/>
+  </g>
+  <path d="M0 0h1280v720H0z" fill="#000" opacity=".31"/>
+  <path d="M0 0h1280v720H0z" fill="none" stroke="#000" stroke-width="75" opacity=".43"/>
+  <g fill="#c3bba7" opacity=".62" font-family="monospace">
+    <text x="34" y="54" font-size="20">CAM 11 // ALMACEN</text>
+    <text x="1020" y="54" font-size="15">REC 00:00:--</text>
+  </g>
+  <path d="M0 90h1280M0 360h1280M0 630h1280" stroke="#fff" stroke-opacity=".035" stroke-width="2"/>
+</svg>

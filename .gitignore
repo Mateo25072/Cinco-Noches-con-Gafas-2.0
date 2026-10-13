@@ -5,7 +5,6 @@ dist-android/
 .tanstack/
 .grok/
 artifacts/.tmp/
-artifacts/windows/win-unpacked/
 artifacts/windows/builder-debug.yml
 attachments/
 screenshots/*
