@@ -19,6 +19,7 @@ export class GameAudio {
   private screamNode: Tone | null = null;
   private screamGain: GainNode | null = null;
   private phoneUtter: SpeechSynthesisUtterance | null = null;
+  private voicesReady = false;
 
   unlock() {
     if (!this.ctx) {
@@ -37,6 +38,24 @@ export class GameAudio {
       this.master.connect(this.ctx.destination);
     }
     if (this.ctx.state === "suspended") void this.ctx.resume();
+
+    // Pre-load voices so the phone call works the first night
+    if (typeof window !== "undefined" && window.speechSynthesis && !this.voicesReady) {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        this.voicesReady = true;
+      } else {
+        window.speechSynthesis.addEventListener(
+          "voiceschanged",
+          () => {
+            this.voicesReady = true;
+          },
+          { once: true },
+        );
+        // Force load on some browsers
+        window.speechSynthesis.getVoices();
+      }
+    }
   }
 
   setMuted(m: boolean) {
@@ -443,37 +462,75 @@ export class GameAudio {
       onEnd();
       return;
     }
-    const voices = window.speechSynthesis.getVoices();
-    const es =
-      voices.find((v) => v.lang.toLowerCase().startsWith("es")) ??
-      voices.find((v) => v.lang.toLowerCase().startsWith("en")) ??
-      null;
-    let i = 0;
-    const next = () => {
-      if (i >= lines.length) {
-        this.phoneUtter = null;
-        onEnd();
-        return;
-      }
-      onLine(i);
-      const u = new SpeechSynthesisUtterance(lines[i]);
-      u.rate = 0.88;
-      u.pitch = 0.72;
-      u.volume = this.muted ? 0 : 0.95;
-      if (es) u.voice = es;
-      u.lang = es?.lang ?? "es-ES";
-      u.onend = () => {
-        i += 1;
-        window.setTimeout(next, 280);
+
+    const startSpeaking = () => {
+      const voices = window.speechSynthesis.getVoices();
+      // Prefer Spanish voices, then English, then any
+      const es =
+        voices.find((v) => v.lang.toLowerCase().startsWith("es")) ??
+        voices.find((v) => v.lang.toLowerCase().includes("spanish")) ??
+        voices.find((v) => v.lang.toLowerCase().startsWith("en")) ??
+        voices[0] ??
+        null;
+
+      let i = 0;
+      const next = () => {
+        if (i >= lines.length) {
+          this.phoneUtter = null;
+          onEnd();
+          return;
+        }
+        onLine(i);
+        const u = new SpeechSynthesisUtterance(lines[i]);
+        u.rate = 0.88;
+        u.pitch = 0.72;
+        u.volume = this.muted ? 0 : 0.95;
+        if (es) u.voice = es;
+        u.lang = es?.lang ?? "es-ES";
+
+        u.onend = () => {
+          i += 1;
+          window.setTimeout(next, 280);
+        };
+        u.onerror = () => {
+          // Skip failed line and continue
+          i += 1;
+          window.setTimeout(next, 100);
+        };
+
+        this.phoneUtter = u;
+        try {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(u);
+        } catch {
+          i += 1;
+          next();
+        }
       };
-      u.onerror = () => {
-        i += 1;
-        next();
-      };
-      this.phoneUtter = u;
-      window.speechSynthesis.speak(u);
+      next();
     };
-    next();
+
+    // Wait for voices if they are not ready yet (common on first load)
+    const currentVoices = window.speechSynthesis.getVoices();
+    if (currentVoices.length === 0) {
+      let started = false;
+      const onVoicesChanged = () => {
+        if (started) return;
+        started = true;
+        window.speechSynthesis.removeEventListener("voiceschanged", onVoicesChanged);
+        startSpeaking();
+      };
+      window.speechSynthesis.addEventListener("voiceschanged", onVoicesChanged);
+      // Safety timeout in case voiceschanged never fires
+      window.setTimeout(() => {
+        if (started) return;
+        started = true;
+        window.speechSynthesis.removeEventListener("voiceschanged", onVoicesChanged);
+        startSpeaking();
+      }, 1800);
+    } else {
+      startSpeaking();
+    }
   }
 
   stopPhone() {
