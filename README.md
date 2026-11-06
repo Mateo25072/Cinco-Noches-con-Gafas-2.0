@@ -1,81 +1,109 @@
 # Cinco Noches con Gafas
 
-Fan game tipo Five Nights at Freddy's. No está afiliado a Scott Cawthon ni Steel Wool.
+Fan game tipo *Five Nights at Freddy's*.  
+**No está afiliado** a Scott Cawthon ni a Steel Wool Studios.
 
-Cinco amenazas. Cada una se contrapone distinto.
+Cinco amenazas. Cada una se enfrenta de forma distinta. Sobrevive de las 12 AM a las 6 AM.
 
-## Personajes
+---
+
+## Personajes y cómo defenderte
 
 | Quién | Cómo se defiende |
 | --- | --- |
-| **Gafas** | Linterna en el pasillo. Si abres las cámaras con él en la puerta, te encandila, sube el pánico y te come 10% de batería. |
-| **Almirante Chaparro** | Camina lento. No lo mires más de 3 segundos en una cámara: se ofende y llena esa cámara de humo el resto de la noche. En la puerta izquierda, ciérrala. |
-| **Muecas** | No sale en cámaras. Un grito se acerca por el conducto. Cuando está encima, 2 segundos para cerrar la rejilla. |
-| **El Fachero** | Sin ruido. Solo un brillo rojo en las gafas. En la puerta derecha, cierra **sin** encender la linterna. |
-| **General Tórtolo** | Se planta en la cámara 05 (pasillo) y no hace nada. Es un señuelo. Ignóralo. |
+| **Gafas** | Entra por el **conducto izquierdo**. Cuando llega a la boca del ducto, cierra la **puerta izquierda (Q)**. |
+| **Muecas** | Entra por el **conducto derecho**. Cuando llega a la boca, cierra la **puerta derecha (E)**. |
+| **Almirante Chaparro** | Se planta al fondo del pasillo central. **Parpadea la linterna 3 veces** mirándolo (mantén **F**) y se va. |
+| **El Fachero** | Entra en silencio a la oficina. **Míralo**. Si dejas de verlo más de 5 segundos, te mata. Si sostienes la mirada, se retira. |
+| **General Tórtolo** | Se esconde en las cámaras. Encuéntralo y dale **3 destellos** (botón *Destello* o tecla **F** en el monitor). Si no lo calmas, entra y te mata. |
+
+---
 
 ## Controles
 
-- Mirar: ratón o A / D
-- Puerta izquierda: **Q**
-- Puerta derecha: **E**
-- Rejilla del conducto: **G** o **V**
-- Linterna: **F** (mantener)
-- Cámaras: **C** o espacio
+| Acción | Teclado | Móvil / Táctil |
+| --- | --- | --- |
+| Mirar izquierda / derecha | **A / D** o ratón | Deslizar |
+| Puerta izquierda | **Q** | Botón *Puerta I* |
+| Puerta derecha | **E** | Botón *Puerta D* |
+| Rejilla del conducto | **G** o **V** | Botón *Rejilla* |
+| Linterna | **F** (mantener) | Mantener botón *Linterna* |
+| Cámaras / Tablet | **C** o **Espacio** | Botón *Cámaras* |
+| Destello en cámara | **F** (con tablet abierta) | Botón *Destello* |
+| Reiniciar generador (apagón) | Mantener **R** 3 segundos | Mantener el botón de reinicio |
 
-Batería: puertas, rejilla, linterna y tablet. Si se acaba, se apaga todo.
+**Batería**: se consume con puertas, rejilla, linterna y tablet. Si se agota → apagón.
+
+---
 
 ## Mejoras de la edición ampliada
 
-- CAM 10 (Cocina) y CAM 11 (Almacén) añaden rutas nuevas con arte original.
-- Los señuelos de cocina y almacén pueden retrasar a Gafas y Muecas. Cada uso consume 8% de batería y tiene enfriamiento.
-- En un apagón, mantén **R** durante 3 segundos para reiniciar el generador; devuelve 28% de batería y solo se puede usar una vez por noche.
-- El zumbido ambiental aumenta cuando una amenaza se acerca. En **Ajustes** puedes bajar el volumen o reducir los destellos y el movimiento.
+- **CAM 10 (Cocina)** y **CAM 11 (Almacén)** con rutas nuevas.
+- **Señuelos**:
+  - Cocina → golpear ollas (aleja a Gafas).
+  - Almacén → campana (distrae a Muecas).
+  - Cada uso cuesta **8 % de batería** y tiene enfriamiento.
+- **Generador de emergencia**: en un apagón, mantén **R** 3 segundos. Devuelve **28 % de batería**. Solo se puede usar **una vez por noche**.
+- Zumbido ambiental que aumenta cuando una amenaza se acerca.
+- En **Ajustes** puedes bajar el volumen o activar “Reducir parpadeos y movimiento”.
 
-## Cómo correrlo
+---
+
+## Cómo jugar (desarrollo)
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre la URL que imprime Vite. `npm run build` genera la versión de producción.
+Abre la URL que muestra Vite.  
+`npm run build` genera la versión de producción.
 
-Hecho con React, Vite y TanStack Start.
+Hecho con **React + Vite + TanStack Start**.
 
-## Ejecutable portatil de Windows sin conexion
+---
 
-El proyecto puede generar un unico `.exe` portable que incluye el juego, sus
-imagenes y los cinco videos de animacion. Una vez generado, se puede abrir sin
-instalador, servidor ni conexion a internet. El progreso se guarda localmente
-en el perfil de Windows.
+## Ejecutable portable de Windows (sin conexión)
 
-En Windows x64 con Node.js 22, instala las dependencias y genera el ejecutable:
+Genera un único `.exe` portable con el juego, imágenes y videos de jumpscare.
+
+Requisitos: Windows x64 + Node.js 22.
 
 ```powershell
 npm install
 npm run desktop:dist
 ```
 
-El archivo se genera en
-`artifacts/windows/Cinco Noches con Gafas-2.0.0-portable.exe`. Windows puede
-mostrar una advertencia de SmartScreen porque el ejecutable no esta firmado.
+El archivo se crea en:
+`artifacts/windows/Cinco Noches con Gafas-2.0.0-portable.exe`
 
-## APK Android offline
+> Windows puede mostrar la advertencia de SmartScreen porque el ejecutable no está firmado.
 
-La version Android usa el mismo juego y recursos locales. Se inicia en
-paisaje; los controles son tactiles. Cocina, Almacen, señuelos, audio,
-animaciones y progreso local funcionan sin conexion.
+---
 
-Instala Node.js 22, JDK 21 y Android Studio con Android SDK Platform 35. Luego,
-desde Windows, ejecuta:
+## APK Android (offline)
+
+La versión Android usa los mismos recursos locales. Se inicia en horizontal y los controles son táctiles.
+
+Requisitos: Node.js 22, JDK 21 y Android Studio (SDK Platform 35).
 
 ```powershell
 npm install
 npm run android:apk
 ```
 
-El APK de prueba se genera en
-`android/app/build/outputs/apk/debug/app-debug.apk`. Para distribuirlo como
-version final, firma un APK release con una clave propia de Android; no
-compartas ni subas la clave privada.
+El APK de prueba se genera en:
+`android/app/build/outputs/apk/debug/app-debug.apk`
+
+Para una versión de distribución, firma un APK *release* con tu propia clave (nunca subas la clave privada).
+
+---
+
+## Notas técnicas recientes
+
+- **Voz del teléfono** (explicación de mecánicas al inicio de la noche): se mejoró el sistema de `speechSynthesis` para que espere correctamente a que las voces estén cargadas. Si en algún dispositivo Android no se escucha, es limitación de la plataforma.
+- El progreso se guarda localmente en el navegador / perfil de Windows / dispositivo Android.
+
+---
+
+Fan game creado para diversión. Disfruta y sobrevive hasta las 6 AM.
