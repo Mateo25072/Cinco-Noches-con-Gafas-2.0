@@ -197,6 +197,9 @@ export function PlayScreen({
               )
             ) : null}
             {snap.fachero === "office" ? <Face who="fachero" className="face-office" /> : null}
+            <div className={`office-photo ${snap.officePhotoCreepy ? "is-creepy" : ""}`} aria-hidden="true">
+              {snap.officePhotoCreepy ? <Eyes /> : null}
+            </div>
           </OfficePanel>
           <OfficePanel src={ASSETS.officeRight}>
             {snap.muecas === "mouth" && !snap.doorR ? (
@@ -224,6 +227,9 @@ export function PlayScreen({
           <div className="blind-flash" style={{ opacity: Math.min(1, snap.blinded) }} />
         ) : null}
         {snap.powerOut ? <div className="power-black" /> : null}
+        {snap.breathFog > 0.05 ? (
+          <div className="breath-fog" style={{ opacity: Math.min(0.55, snap.breathFog) }} />
+        ) : null}
 
         {snap.cameras ? <CameraTablet engine={engine} snap={snap} /> : null}
       </div>
@@ -234,7 +240,12 @@ export function PlayScreen({
         <Jumpscare who={snap.jumpscare} engine={engine} />
       ) : null}
       {snap.phase === "gameover" ? (
-        <EndCard title="GAME OVER" action="Menú" onAction={() => engine.goMenu()} />
+        <EndCard
+          title="GAME OVER"
+          subtitle={snap.deathTip ?? undefined}
+          action="Menú"
+          onAction={() => engine.goMenu()}
+        />
       ) : null}
       {snap.phase === "sixam" ? (
         <EndCard
@@ -313,7 +324,7 @@ function CameraTablet({ engine, snap }: { engine: FnafEngine; snap: EngineSnap }
           <div className="tablet-scan" />
           <div className="tablet-static" style={{ opacity: 0.28 + snap.staticAmt * 0.72 }} />
           {snap.staticAmt > 0.42 ? (
-            <div className="cam-tear" style={{ top: `${18 + (snap.staticAmt * 57) % 62}%` }} />
+            <div className="cam-tear" style={{ top: `${18 + ((snap.staticAmt * 57) % 62)}%` }} />
           ) : null}
           <div className="tablet-meta">
             <span className="rec">REC</span>
@@ -402,16 +413,24 @@ function Hud({
       ) : null}
 
       <div className="alert-stack">
-        {snap.gafas === "mouth" ? <p className="warn-flash">Gafas en el conducto izquierdo — cierra la puerta</p> : null}
-        {snap.muecas === "mouth" ? <p className="warn-flash">Muecas en el conducto derecho — cierra la puerta</p> : null}
+        {snap.gafas === "mouth" ? (
+          <p className="warn-flash">Gafas en el conducto izquierdo — cierra la puerta</p>
+        ) : null}
+        {snap.muecas === "mouth" ? (
+          <p className="warn-flash">Muecas en el conducto derecho — cierra la puerta</p>
+        ) : null}
         {snap.chaparro === "hall" ? (
           <p className="scream-hint">Chaparro al fondo — parpadea la linterna {snap.chapFlashes}/3</p>
         ) : null}
         {snap.fachero === "office" ? (
-          <p className="warn-flash">Fachero dentro — míralo ({Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s)</p>
+          <p className="warn-flash">
+            Fachero dentro — míralo ({Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s)
+          </p>
         ) : null}
         {snap.tortolo !== "calm" ? (
-          <p className="scream-hint">Tórtolo en las cámaras — destello {snap.tortoloFlashes}/3</p>
+          <p className="scream-hint">
+            Tórtolo en cam — destello {snap.tortoloFlashes}/3 · si no lo miras, se mueve
+          </p>
         ) : null}
       </div>
 
@@ -561,7 +580,7 @@ function EndCard({
   return (
     <div className="end-card">
       <h2>{title}</h2>
-      {subtitle ? <p>{subtitle}</p> : null}
+      {subtitle ? <p className="death-tip">{subtitle}</p> : null}
       <button type="button" onClick={onAction}>
         {action}
       </button>
