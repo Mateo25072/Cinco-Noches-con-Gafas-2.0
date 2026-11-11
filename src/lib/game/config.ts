@@ -56,17 +56,18 @@ export const CAM_LIST: { id: CamId; num: string; name: string }[] = [
 export function aiForNight(night: number): AiLevels {
   switch (night) {
     case 1:
-      return { gafas: 4, muecas: 0, chaparro: 3, fachero: 0, tortolo: 6 };
+      // Tutorial: Tórtolo suave para que el jugador aprenda
+      return { gafas: 3, muecas: 0, chaparro: 2, fachero: 0, tortolo: 2 };
     case 2:
-      return { gafas: 7, muecas: 6, chaparro: 5, fachero: 0, tortolo: 8 };
+      return { gafas: 6, muecas: 5, chaparro: 4, fachero: 0, tortolo: 5 };
     case 3:
-      return { gafas: 9, muecas: 9, chaparro: 7, fachero: 6, tortolo: 10 };
+      return { gafas: 8, muecas: 8, chaparro: 6, fachero: 5, tortolo: 8 };
     case 4:
-      return { gafas: 12, muecas: 12, chaparro: 10, fachero: 9, tortolo: 12 };
+      return { gafas: 11, muecas: 11, chaparro: 9, fachero: 8, tortolo: 11 };
     case 5:
-      return { gafas: 15, muecas: 15, chaparro: 13, fachero: 13, tortolo: 14 };
+      return { gafas: 14, muecas: 14, chaparro: 12, fachero: 12, tortolo: 13 };
     case 6:
-      return { gafas: 18, muecas: 17, chaparro: 16, fachero: 16, tortolo: 16 };
+      return { gafas: 17, muecas: 16, chaparro: 15, fachero: 15, tortolo: 15 };
     default:
       return { gafas: 5, muecas: 5, chaparro: 4, fachero: 4, tortolo: 6 };
   }
