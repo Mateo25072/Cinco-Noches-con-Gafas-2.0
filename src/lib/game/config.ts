@@ -80,7 +80,7 @@ export const PHONE: Record<number, string[]> = {
     "Chaparro se planta al fondo del pasillo central. Parpadea la linterna tres veces mirándolo y se va. Si no, salta.",
   ],
   2: [
-    "El Fachero se acerca en silencio. Cuando entre a la oficina, míralo. Si dejas de verlo más de cinco segundos, te mata. Si lo miras un rato, se va.",
+    "El Fachero se acerca en silencio. Cuando entre a la oficina, míralo. Si dejas de verlo más de unos seis segundos, te mata. Si lo miras un rato, se va.",
     "Tórtolo se esconde en las cámaras. Encuéntralo y dale tres destellos con el botón Destello, o con F. Si no lo calmas, entra y te mata.",
   ],
   3: ["Los dos conductos pueden llenarse a la vez. No dejes las puertas cerradas de más: la batería suma cada cosa que dejas encendida."],
