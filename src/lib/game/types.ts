@@ -95,4 +95,7 @@ export type EngineSnap = {
   generatorResetProgress: number;
   generatorResetUsed: boolean;
   lureCooldown: number;
+  deathTip: string | null;
+  officePhotoCreepy: boolean;
+  breathFog: number;
 };
