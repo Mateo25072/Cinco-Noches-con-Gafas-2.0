@@ -123,6 +123,7 @@ export class FnafEngine {
   generatorResetProgress = 0;
   generatorResetUsed = false;
   lureCooldown = 0;
+  camWatchAcc = 0;
   private generatorResetHeld = false;
   private lastAmbientThreat = -1;
 
@@ -258,6 +259,7 @@ export class FnafEngine {
     this.generatorResetUsed = false;
     this.generatorResetHeld = false;
     this.lureCooldown = 0;
+    this.camWatchAcc = 0;
     this.lastAmbientThreat = -1;
     this.flashHeld = false;
     this.flashDelay = 0;
@@ -506,12 +508,20 @@ export class FnafEngine {
       return;
     }
 
-    this.panic = Math.max(0, this.panic - cap * 0.035);
+    if (this.cameras) this.camWatchAcc += cap;
+    else this.camWatchAcc = Math.max(0, this.camWatchAcc - cap * 0.6);
+
+    if (this.gafas === "mouth" && this.muecas === "mouth") {
+      this.panic = Math.min(1, this.panic + cap * 0.045);
+    } else {
+      this.panic = Math.max(0, this.panic - cap * 0.035);
+    }
     if (this.panic >= 1) {
       this.kill("panic");
       return;
     }
 
+    this.tickTeamSupport(cap);
     this.tickChaparro(cap);
     this.gafasIn -= cap;
     this.muecasIn -= cap;
@@ -596,20 +606,68 @@ export class FnafEngine {
     return (1 + this.hour * 0.16) * nightBoost;
   }
 
-  private effectiveAi(base: number) {
-    return Math.min(20, base * (0.82 + this.hour * 0.14));
+  private effectiveAi(base: number, kind?: "gafas" | "muecas" | "chap" | "fach" | "tortolo") {
+    let mult = 0.82 + this.hour * 0.14;
+    if (kind) mult *= this.teamAiMult(kind);
+    return Math.min(20, base * mult);
+  }
+
+  private teamAiMult(kind: "gafas" | "muecas" | "chap" | "fach" | "tortolo"): number {
+    let m = 1;
+    if (kind === "muecas" && (this.gafas === "mouth" || this.gafas === "ventL")) m *= 1.35;
+    if (kind === "gafas" && (this.muecas === "mouth" || this.muecas === "ventR")) m *= 1.35;
+    if (kind === "muecas" && (this.doorL || this.grate) && this.gafas === "mouth") m *= 1.2;
+    if (kind === "gafas" && this.doorR && this.muecas === "mouth") m *= 1.2;
+    if (this.cameras || this.camWatchAcc > 4) {
+      if (kind === "fach") m *= 1.4;
+      if (kind === "chap") m *= 1.25;
+      if (kind === "gafas" || kind === "muecas") m *= 1.12;
+    }
+    if (this.tortolo !== "calm" && this.ai.tortolo > 0) {
+      if (kind === "fach") m *= 1.22;
+      if (kind === "chap") m *= 1.15;
+    }
+    if ((kind === "gafas" || kind === "muecas") && this.fachero === "office") m *= 1.18;
+    if (kind === "tortolo" && this.chaparro === "hall") m *= 1.12;
+    return m;
+  }
+
+  private teamIntervalMult(kind: "gafas" | "muecas" | "chap" | "fach" | "tortolo"): number {
+    let m = 1;
+    if (kind === "muecas" && this.gafas === "mouth") m *= 0.72;
+    if (kind === "gafas" && this.muecas === "mouth") m *= 0.72;
+    if (kind === "fach" && this.cameras) m *= 0.75;
+    if (kind === "chap" && this.cameras) m *= 0.8;
+    if (kind === "fach" && this.tortolo !== "calm") m *= 0.85;
+    if ((kind === "gafas" || kind === "muecas") && this.fachero === "office") m *= 0.88;
+    return m;
   }
 
   private armMove(kind: "gafas" | "muecas" | "chap" | "fach" | "tortolo") {
     const base =
       kind === "chap" ? 11 : kind === "muecas" ? 8.2 : kind === "fach" ? 7.4 : kind === "tortolo" ? 9 : 6.4;
     const jitter = 0.55 + Math.random() * 0.9;
-    const wait = (base / this.pressure()) * jitter;
+    const wait = (base / this.pressure()) * jitter * this.teamIntervalMult(kind);
     if (kind === "gafas") this.gafasIn = wait;
     else if (kind === "muecas") this.muecasIn = wait;
     else if (kind === "chap") this.chapIn = wait;
     else if (kind === "fach") this.fachIn = wait;
     else this.tortoloIn = wait;
+  }
+
+  private tickTeamSupport(_dt: number) {
+    if (this.gafas === "mouth" && this.muecas !== "mouth" && this.muecasIn > 2.2) {
+      this.muecasIn = Math.max(1.1, this.muecasIn * 0.92);
+    }
+    if (this.muecas === "mouth" && this.gafas !== "mouth" && this.gafasIn > 2.2) {
+      this.gafasIn = Math.max(1.1, this.gafasIn * 0.92);
+    }
+    if (this.cameras && this.camWatchAcc > 5 && this.fachero !== "office" && this.fachIn > 2.5) {
+      this.fachIn = Math.max(1.2, this.fachIn * 0.9);
+    }
+    if (this.tortolo !== "calm" && this.cameras && this.chaparro !== "hall" && this.chapIn > 3) {
+      this.chapIn = Math.max(1.5, this.chapIn * 0.94);
+    }
   }
 
   private tickFlashDelay(dt: number) {
@@ -712,7 +770,7 @@ export class FnafEngine {
 
   private tryMoveGafas() {
     if (this.ai.gafas <= 0 || this.gafas === "mouth") return;
-    if (!this.roll(this.effectiveAi(this.ai.gafas))) return;
+    if (!this.roll(this.effectiveAi(this.ai.gafas, "gafas"))) return;
     const i = GAFAS_PATH.indexOf(this.gafas);
     const next = GAFAS_PATH[Math.min(GAFAS_PATH.length - 1, i + 1)];
     if (!next || next === this.gafas) return;
@@ -724,7 +782,7 @@ export class FnafEngine {
 
   private tryMoveMuecas() {
     if (this.ai.muecas <= 0 || this.muecas === "mouth") return;
-    if (!this.roll(this.effectiveAi(this.ai.muecas))) return;
+    if (!this.roll(this.effectiveAi(this.ai.muecas, "muecas"))) return;
     const i = MUECAS_PATH.indexOf(this.muecas);
     const next = MUECAS_PATH[Math.min(MUECAS_PATH.length - 1, i + 1)];
     if (!next || next === this.muecas) return;
@@ -739,7 +797,7 @@ export class FnafEngine {
 
   private tryMoveChaparro() {
     if (this.ai.chaparro <= 0 || this.chaparro === "hall") return;
-    if (!this.roll(this.effectiveAi(this.ai.chaparro))) return;
+    if (!this.roll(this.effectiveAi(this.ai.chaparro, "chap"))) return;
     this.chaparro = "hall";
     this.chapFlashes = 0;
     this.hallTimer = 0;
@@ -749,7 +807,7 @@ export class FnafEngine {
 
   private tryMoveFachero() {
     if (this.ai.fachero <= 0 || this.fachero === "office") return;
-    if (!this.roll(this.effectiveAi(this.ai.fachero))) return;
+    if (!this.roll(this.effectiveAi(this.ai.fachero, "fach"))) return;
     const i = FACHERO_PATH.indexOf(this.fachero);
     const next = FACHERO_PATH[Math.min(FACHERO_PATH.length - 1, i + 1)];
     if (!next || next === this.fachero) return;
@@ -763,7 +821,7 @@ export class FnafEngine {
 
   private tryMoveTortolo() {
     if (this.ai.tortolo <= 0 || this.tortolo === "calm") return;
-    if (!this.roll(this.effectiveAi(this.ai.tortolo) * 0.85)) return;
+    if (!this.roll(this.effectiveAi(this.ai.tortolo, "tortolo") * 0.85)) return;
     this.tortolo = pickTortolo(this.tortolo === "calm" ? undefined : this.tortolo);
     this.tortoloFlashes = 0;
     this.tortoloRage = 0;
@@ -785,7 +843,9 @@ export class FnafEngine {
       return;
     }
     this.ventTimer += dt;
-    const patience = this.night <= 2 ? 5.8 : this.night <= 4 ? 4.6 : 3.6;
+    let patience = this.night <= 2 ? 5.8 : this.night <= 4 ? 4.6 : 3.6;
+    if (this.muecas === "mouth") patience *= 0.72;
+    if (this.fachero === "office") patience *= 0.88;
     if (this.ventTimer > patience) this.kill("gafas");
   }
 
@@ -812,7 +872,9 @@ export class FnafEngine {
       return;
     }
     this.muecasTimer += dt;
-    const patience = this.night <= 2 ? 5.0 : this.night <= 4 ? 3.8 : 3.3;
+    let patience = this.night <= 2 ? 5.0 : this.night <= 4 ? 3.8 : 3.3;
+    if (this.gafas === "mouth") patience *= 0.72;
+    if (this.fachero === "office") patience *= 0.88;
     if (this.muecasTimer > patience) this.kill("muecas");
   }
 
@@ -820,7 +882,9 @@ export class FnafEngine {
     if (this.chaparro !== "hall") return;
     if (this.chapFlashes >= 3) return;
     this.hallTimer += dt;
-    const patience = this.night <= 2 ? 10 : this.night <= 4 ? 7.5 : 6.0;
+    let patience = this.night <= 2 ? 10 : this.night <= 4 ? 7.5 : 6.0;
+    if (this.cameras) patience *= 0.82;
+    if (this.fachero === "office") patience *= 0.9;
     if (this.hallTimer > patience) this.kill("chaparro");
   }
 
@@ -841,7 +905,10 @@ export class FnafEngine {
     }
     this.fachWatch = 0;
     this.fachLook += dt;
-    if (this.fachLook > 6.5) this.kill("fachero");
+    let limit = 6.5;
+    if (this.gafas === "mouth" || this.muecas === "mouth") limit = 5.2;
+    if (this.tortolo !== "calm") limit = Math.min(limit, 5.6);
+    if (this.fachLook > limit) this.kill("fachero");
   }
 
   private tickTortolo(dt: number) {
