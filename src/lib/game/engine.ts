@@ -18,14 +18,7 @@ const GAFAS_PATH: GafasLoc[] = ["stage", "party", "kitchen", "ventL", "mouth"];
 const MUECAS_PATH: MuecasLoc[] = ["games", "storage", "cove", "ventR", "mouth"];
 const FACHERO_PATH: FacheroLoc[] = ["parts", "games", "hall", "office"];
 const TORTOLO_ROOMS: TortoloLoc[] = [
-  "parts",
-  "prize",
-  "party",
-  "cove",
-  "games",
-  "hall",
-  "kitchen",
-  "storage",
+  "parts", "prize", "party", "cove", "games", "hall", "kitchen", "storage",
 ];
 
 function pickTortolo(except?: TortoloLoc): TortoloLoc {
@@ -124,6 +117,7 @@ export class FnafEngine {
   generatorResetUsed = false;
   lureCooldown = 0;
   camWatchAcc = 0;
+  staggerLock = 0;
   private generatorResetHeld = false;
   private lastAmbientThreat = -1;
 
@@ -260,6 +254,7 @@ export class FnafEngine {
     this.generatorResetHeld = false;
     this.lureCooldown = 0;
     this.camWatchAcc = 0;
+    this.staggerLock = 0;
     this.lastAmbientThreat = -1;
     this.flashHeld = false;
     this.flashDelay = 0;
@@ -510,9 +505,11 @@ export class FnafEngine {
 
     if (this.cameras) this.camWatchAcc += cap;
     else this.camWatchAcc = Math.max(0, this.camWatchAcc - cap * 0.6);
+    this.staggerLock = Math.max(0, this.staggerLock - cap);
 
-    if (this.gafas === "mouth" && this.muecas === "mouth") {
-      this.panic = Math.min(1, this.panic + cap * 0.045);
+    const urgent = this.urgentCount();
+    if (urgent >= 3) {
+      this.panic = Math.min(1, this.panic + cap * 0.03);
     } else {
       this.panic = Math.max(0, this.panic - cap * 0.035);
     }
@@ -656,17 +653,19 @@ export class FnafEngine {
   }
 
   private tickTeamSupport(_dt: number) {
+    if (this.staggerLock > 0) return;
+    if (this.urgentCount() >= 2) return;
     if (this.gafas === "mouth" && this.muecas !== "mouth" && this.muecasIn > 2.2) {
-      this.muecasIn = Math.max(1.1, this.muecasIn * 0.92);
+      this.muecasIn = Math.max(1.4, this.muecasIn * 0.94);
     }
     if (this.muecas === "mouth" && this.gafas !== "mouth" && this.gafasIn > 2.2) {
-      this.gafasIn = Math.max(1.1, this.gafasIn * 0.92);
+      this.gafasIn = Math.max(1.4, this.gafasIn * 0.94);
     }
     if (this.cameras && this.camWatchAcc > 5 && this.fachero !== "office" && this.fachIn > 2.5) {
-      this.fachIn = Math.max(1.2, this.fachIn * 0.9);
+      this.fachIn = Math.max(1.5, this.fachIn * 0.92);
     }
     if (this.tortolo !== "calm" && this.cameras && this.chaparro !== "hall" && this.chapIn > 3) {
-      this.chapIn = Math.max(1.5, this.chapIn * 0.94);
+      this.chapIn = Math.max(1.8, this.chapIn * 0.95);
     }
   }
 
@@ -768,14 +767,61 @@ export class FnafEngine {
     return Math.random() * 20 < ai;
   }
 
+  private urgentCount(): number {
+    let n = 0;
+    if (this.gafas === "mouth") n += 1;
+    if (this.muecas === "mouth") n += 1;
+    if (this.chaparro === "hall") n += 1;
+    if (this.fachero === "office") n += 1;
+    return n;
+  }
+
+  private canEnterUrgent(
+    kind: "gafasMouth" | "muecasMouth" | "chapHall" | "fachOffice",
+  ): boolean {
+    if (this.staggerLock > 0) return false;
+    const urgent = this.urgentCount();
+    if (urgent >= 2) return false;
+
+    const dualMouthOk = this.night >= 5 || this.night === 0;
+    if (kind === "gafasMouth" && this.muecas === "mouth" && !dualMouthOk) return false;
+    if (kind === "muecasMouth" && this.gafas === "mouth" && !dualMouthOk) return false;
+
+    if (this.night > 0 && this.night <= 2) {
+      if (kind === "chapHall" && this.fachero === "office") return false;
+      if (kind === "fachOffice" && this.chaparro === "hall") return false;
+    }
+
+    if (urgent >= 1 && (kind === "chapHall" || kind === "fachOffice")) {
+      if (this.gafas === "mouth" || this.muecas === "mouth") return false;
+    }
+
+    return true;
+  }
+
+  private markUrgentEnter() {
+    this.staggerLock = this.night <= 2 ? 4.5 : this.night <= 4 ? 3.2 : 2.2;
+  }
+
   private tryMoveGafas() {
     if (this.ai.gafas <= 0 || this.gafas === "mouth") return;
     if (!this.roll(this.effectiveAi(this.ai.gafas, "gafas"))) return;
     const i = GAFAS_PATH.indexOf(this.gafas);
     const next = GAFAS_PATH[Math.min(GAFAS_PATH.length - 1, i + 1)];
     if (!next || next === this.gafas) return;
+    if (next === "mouth" && !this.canEnterUrgent("gafasMouth")) {
+      if (this.gafas !== "ventL") {
+        this.gafas = "ventL";
+        this.audio.footsteps(-0.65);
+        this.emit();
+      }
+      return;
+    }
     this.gafas = next;
-    if (next === "mouth") this.ventTimer = 0;
+    if (next === "mouth") {
+      this.ventTimer = 0;
+      this.markUrgentEnter();
+    }
     this.audio.footsteps(-0.65);
     this.emit();
   }
@@ -786,10 +832,20 @@ export class FnafEngine {
     const i = MUECAS_PATH.indexOf(this.muecas);
     const next = MUECAS_PATH[Math.min(MUECAS_PATH.length - 1, i + 1)];
     if (!next || next === this.muecas) return;
+    if (next === "mouth" && !this.canEnterUrgent("muecasMouth")) {
+      if (this.muecas !== "ventR") {
+        this.muecas = "ventR";
+        this.audio.setScreamLoop(0.35);
+        this.audio.footsteps(0.65);
+        this.emit();
+      }
+      return;
+    }
     this.muecas = next;
     if (next === "mouth") {
       this.muecasTimer = 0;
       this.audio.setScreamLoop(0.7);
+      this.markUrgentEnter();
     }
     this.audio.footsteps(0.65);
     this.emit();
@@ -798,9 +854,11 @@ export class FnafEngine {
   private tryMoveChaparro() {
     if (this.ai.chaparro <= 0 || this.chaparro === "hall") return;
     if (!this.roll(this.effectiveAi(this.ai.chaparro, "chap"))) return;
+    if (!this.canEnterUrgent("chapHall")) return;
     this.chaparro = "hall";
     this.chapFlashes = 0;
     this.hallTimer = 0;
+    this.markUrgentEnter();
     this.audio.footsteps();
     this.emit();
   }
@@ -811,10 +869,18 @@ export class FnafEngine {
     const i = FACHERO_PATH.indexOf(this.fachero);
     const next = FACHERO_PATH[Math.min(FACHERO_PATH.length - 1, i + 1)];
     if (!next || next === this.fachero) return;
+    if (next === "office" && !this.canEnterUrgent("fachOffice")) {
+      if (this.fachero !== "hall") {
+        this.fachero = "hall";
+        this.emit();
+      }
+      return;
+    }
     this.fachero = next;
     if (next === "office") {
       this.fachLook = 0;
       this.fachWatch = 0;
+      this.markUrgentEnter();
     }
     this.emit();
   }
