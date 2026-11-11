@@ -891,27 +891,114 @@ input {
     grid-template-columns: 1fr;
     height: 92dvh;
   }
-
   .generator-reset {
     bottom: 122px;
   }
-
   .hud-bottom {
     bottom: 36px;
   }
-
   .hud-hint {
     display: none;
   }
-
   .hud-bottom-5 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
+@media (max-width: 900px) and (orientation: landscape) {
+  .hud-bottom-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    bottom: 24px;
+  }
+  .act {
+    padding: 11px 5px;
+    font-size: 0.68rem;
+  }
+  .tablet-bezel {
+    width: min(96vw, 1100px);
+    height: 90dvh;
+    grid-template-columns: 1.7fr 0.9fr;
+  }
+}
+
+.app-root,
+.game-stage,
+.menu {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  :root {
+    --sl: env(safe-area-inset-left, 0px);
+    --sr: env(safe-area-inset-right, 0px);
+    --st: env(safe-area-inset-top, 0px);
+    --sb: env(safe-area-inset-bottom, 0px);
+  }
+  .menu {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+  .menu-panel {
+    width: min(760px, 100%);
+    max-height: 100dvh;
+    padding: 10px calc(16px + var(--sr)) 10px calc(16px + var(--sl));
+    gap: 6px;
+  }
+  .menu-title {
+    font-size: 1.9rem;
+  }
+  .menu-stack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .hud-top {
+    top: calc(4px + var(--st));
+    left: calc(10px + var(--sl));
+    right: calc(10px + var(--sr));
+  }
+  .hud-hour {
+    font-size: 1.05rem;
+  }
+  .meters {
+    flex-direction: row;
+    width: auto;
+    gap: 12px;
+  }
+  .music-meter {
+    width: min(150px, 28vw);
+  }
+  .alert-stack {
+    top: calc(32px + var(--st));
+    left: calc(10px + var(--sl));
+    right: calc(10px + var(--sr));
+    max-width: none;
+    align-items: center;
+    text-align: center;
+  }
+  .hud-bottom {
+    bottom: calc(8px + var(--sb));
+    left: calc(8px + var(--sl));
+    right: calc(8px + var(--sr));
+  }
+  .hud-bottom-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .act {
+    padding: 8px 4px;
+    font-size: 0.62rem;
+  }
+  .tablet-bezel {
+    width: 100vw;
+    height: 100dvh;
+    border-width: 4px;
+    grid-template-columns: 1.6fr 0.9fr;
+  }
+}
+
 /* ========== Horror atmosphere enhancements ========== */
 
-/* Heavy vignette always on during play */
 .game-stage::after {
   content: "";
   position: absolute;
@@ -927,7 +1014,6 @@ input {
   mix-blend-mode: multiply;
 }
 
-/* Breathing darkness when a threat is near */
 .game-stage.is-threat-near::before {
   content: "";
   position: absolute;
