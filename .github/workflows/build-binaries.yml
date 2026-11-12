@@ -6,6 +6,10 @@ on:
         description: "Guardar el .exe y el .apk en artifacts/ de main"
         type: boolean
         default: true
+      release_tag:
+        description: "Si lo escribes (ej. v2.0.1), publica un Release con el .exe y el .apk"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -43,6 +47,26 @@ jobs:
         with:
           name: android-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+  release:
+    needs: [windows, android]
+    if: ${{ inputs.release_tag != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: windows-exe, path: rel }
+      - uses: actions/download-artifact@v4
+        with: { name: android-apk, path: rel }
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release_tag }}
+        run: |
+          mv rel/app-debug.apk rel/Cinco-Noches-con-Gafas.apk
+          mv rel/*.exe rel/Cinco-Noches-con-Gafas-Windows.exe
+          gh release create "$TAG" rel/Cinco-Noches-con-Gafas-Windows.exe rel/Cinco-Noches-con-Gafas.apk \
+            --repo "$GITHUB_REPOSITORY" --target main \
+            --title "Cinco Noches con Gafas $TAG" \
+            --notes "Versión con el menú animado (GIF). Windows: descarga el .exe y ábrelo (portable, no necesita instalación). Android: instala el .apk (versión de prueba)."
 
   publish:
     needs: [windows, android]
