@@ -9,7 +9,7 @@ export const ASSETS = {
   officeLeft: "/game/rooms/office-left.jpg",
   officeRight: "/game/rooms/office-right.jpg",
   menu: "/game/rooms/menu.jpg",
-  splash: "/game/ui/splash.gif",
+  menuGif: "/game/ui/menu.gif",
   cams: {
     stage: "/game/rooms/cam-stage.jpg",
     games: "/game/rooms/cam-games.jpg",

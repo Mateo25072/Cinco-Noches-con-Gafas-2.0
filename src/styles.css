@@ -276,43 +276,110 @@ button, input { font: inherit; }
   .hud-bottom-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-/* Pantalla de inicio (GIF) */
-.splash {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 0;
-  border: 0;
+/* Menú principal estilo FNAF: GIF animado + lista de opciones */
+.menu-fnaf {
+  align-items: stretch;
+  justify-content: flex-start;
   background: #000;
-  color: var(--color-ink);
-  overflow: hidden;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  cursor: default;
 }
-.splash-img {
-  width: 100%;
-  height: 100dvh;
+.fnaf-gif {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
   object-fit: contain;
-  object-position: center;
   user-select: none;
   pointer-events: none;
 }
-.splash-cta {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: max(16px, env(safe-area-inset-bottom, 0px));
-  text-align: center;
-  font-size: 0.78rem;
-  letter-spacing: 0.22em;
+.fnaf-menu {
+  position: relative;
+  z-index: 2;
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 0 max(20px, env(safe-area-inset-bottom, 0px)) max(26px, env(safe-area-inset-left, 0px));
+}
+.fnaf-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2px, 1.2vh, 10px);
+}
+.fnaf-item {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 4px 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: clamp(0.85rem, 3vh, 1.35rem);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-muted);
-  animation: splash-blink 1.8s ease-in-out infinite;
+  color: #e9e3d6;
+  text-shadow: 0 0 8px rgb(255 255 255 / 0.25);
+  -webkit-tap-highlight-color: transparent;
 }
-@keyframes splash-blink {
-  50% { opacity: 0.25; }
+.fnaf-cursor {
+  display: inline-block;
+  width: 1.9em;
+  opacity: 0;
+  color: var(--color-danger);
 }
-.reduce-motion .splash-cta { animation: none; }
+.fnaf-item:hover:not(:disabled) .fnaf-cursor,
+.fnaf-item:focus-visible .fnaf-cursor,
+.fnaf-item:active .fnaf-cursor {
+  opacity: 1;
+}
+.fnaf-item:hover:not(:disabled),
+.fnaf-item:focus-visible {
+  color: #fff;
+  outline: none;
+}
+.fnaf-item:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+.fnaf-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: max(18px, env(safe-area-inset-top, 0px)) max(26px, env(safe-area-inset-right, 0px)) 18px max(26px, env(safe-area-inset-left, 0px));
+  background: rgb(0 0 0 / 0.985);
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+.fnaf-overlay .help { font-size: 0.9rem; max-width: 70ch; }
+.fnaf-overlay .settings-panel { width: min(420px, 100%); }
+.fnaf-legal {
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  margin: 0;
+  font-size: 0.6rem;
+  z-index: 2;
+}
+.fnaf-menu .stars { font-size: 0.9rem; }
+
+@media (orientation: portrait) {
+  .menu-fnaf { flex-direction: column; justify-content: flex-start; }
+  .fnaf-gif { position: relative; width: 100%; height: auto; right: auto; }
+  .fnaf-menu { align-self: flex-start; padding-top: 8px; }
+  .fnaf-item { font-size: 1.1rem; padding: 7px 0; }
+}
+
+.settings-control input,
+.settings-check input { accent-color: var(--color-accent); }
+
+@media (max-height: 420px) and (orientation: landscape) {
+  .fnaf-item { font-size: 0.74rem; padding: 3px 0; letter-spacing: 0.08em; }
+  .fnaf-cursor { width: 1.6em; }
+  .fnaf-menu { padding-left: max(14px, env(safe-area-inset-left, 0px)); }
+}
