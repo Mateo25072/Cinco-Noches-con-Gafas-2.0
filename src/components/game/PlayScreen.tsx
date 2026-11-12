@@ -113,7 +113,7 @@ export function PlayScreen({
     };
   }, [engine]);
 
-  const onPointerMove = (e: PointerEvent) => {
+  const setLookFrom = (e: PointerEvent) => {
     if (snap.cameras) return;
     const el = panRef.current;
     if (!el) return;
@@ -122,6 +122,7 @@ export function PlayScreen({
     const t = Math.min(1, Math.max(0, x)) * 2 - 1;
     lookRef.current = Math.sign(t) * Math.pow(Math.abs(t), 1.12);
   };
+  const onPointerMove = (e: PointerEvent) => setLookFrom(e);
 
   const flashDown = () => engine.setFlashlight(true);
   const flashUp = () => engine.setFlashlight(false);
@@ -150,6 +151,11 @@ export function PlayScreen({
         onPointerMove={onPointerMove}
         onPointerDown={(e) => {
           if ((e.target as HTMLElement).closest("[data-ui]")) return;
+          // En pantalla táctil, tocar solo mira hacia ese lado; la linterna va en su botón.
+          if (e.pointerType === "touch") {
+            setLookFrom(e);
+            return;
+          }
           flashDown();
         }}
         onPointerUp={flashUp}
@@ -414,23 +420,34 @@ function Hud({
 
       <div className="alert-stack">
         {snap.gafas === "mouth" ? (
-          <p className="warn-flash">Gafas en el conducto izquierdo — cierra la puerta</p>
+          <Alert tone="warn" who="Gafas" long="en el conducto izquierdo — cierra la puerta" short="conducto I · cierra" />
         ) : null}
         {snap.muecas === "mouth" ? (
-          <p className="warn-flash">Muecas en el conducto derecho — cierra la puerta</p>
+          <Alert tone="warn" who="Muecas" long="en el conducto derecho — cierra la puerta" short="conducto D · cierra" />
         ) : null}
         {snap.chaparro === "hall" ? (
-          <p className="scream-hint">Chaparro al fondo — parpadea la linterna {snap.chapFlashes}/3</p>
+          <Alert
+            tone="hint"
+            who="Chaparro"
+            long={`al fondo — parpadea la linterna ${snap.chapFlashes}/3`}
+            short={`parpadea ${snap.chapFlashes}/3`}
+          />
         ) : null}
         {snap.fachero === "office" ? (
-          <p className="warn-flash">
-            Fachero dentro — míralo ({Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s)
-          </p>
+          <Alert
+            tone="warn"
+            who="Fachero"
+            long={`dentro — míralo (${Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s)`}
+            short={`míralo ${Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s`}
+          />
         ) : null}
         {snap.tortolo !== "calm" ? (
-          <p className="scream-hint">
-            Tórtolo en cam — destello {snap.tortoloFlashes}/3 · si no lo miras, se mueve
-          </p>
+          <Alert
+            tone="hint"
+            who="Tórtolo"
+            long={`en cam — destello ${snap.tortoloFlashes}/3 · si no lo miras, se mueve`}
+            short={`cam ${snap.tortoloFlashes}/3`}
+          />
         ) : null}
       </div>
 
@@ -458,6 +475,8 @@ function Hud({
           onPointerDown={flashDown}
           onPointerUp={flashUp}
           onPointerLeave={flashUp}
+          onPointerCancel={flashUp}
+          onContextMenu={(e) => e.preventDefault()}
         >
           Linterna
         </button>
@@ -480,6 +499,25 @@ function Hud({
       </div>
       <p className="hud-hint">Q / E puertas · F parpadea · C cámaras · en el monitor, F o Destello</p>
     </div>
+  );
+}
+
+function Alert({
+  tone,
+  who,
+  long,
+  short,
+}: {
+  tone: "warn" | "hint";
+  who: string;
+  long: string;
+  short: string;
+}) {
+  return (
+    <p className={`alert-chip ${tone === "warn" ? "warn-flash" : "scream-hint"}`}>
+      <b>{who}</b> <span className="chip-long">{long}</span>
+      <span className="chip-short">{short}</span>
+    </p>
   );
 }
 
