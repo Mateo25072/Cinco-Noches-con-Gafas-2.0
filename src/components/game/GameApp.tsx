@@ -8,6 +8,7 @@ export function GameApp() {
   const audio = useMemo(() => new GameAudio(), []);
   const engine = useMemo(() => new FnafEngine(audio), [audio]);
   const snap = useSyncExternalStore(engine.subscribe, engine.getSnapshot, engine.getSnapshot);
+  const [splash, setSplash] = useState(true);
   const [paper, setPaper] = useState(false);
   const [muted, setMuted] = useState(false);
   const [help, setHelp] = useState(false);
@@ -62,6 +63,16 @@ export function GameApp() {
 
   const unlock = () => audio.unlock();
 
+  useEffect(() => {
+    if (!splash) return;
+    const onKey = () => {
+      audio.unlock();
+      setSplash(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [splash, audio]);
+
   const toggleMute = () => {
     const next = !muted;
     setMuted(next);
@@ -76,6 +87,23 @@ export function GameApp() {
     setReducedMotion(value);
     storePreference("cncg-reduced-motion", value);
   };
+
+  if (splash) {
+    return (
+      <button
+        type="button"
+        className="splash"
+        aria-label="Cinco noches a bordo — toca para empezar"
+        onClick={() => {
+          unlock();
+          setSplash(false);
+        }}
+      >
+        <img src={ASSETS.splash} alt="" className="splash-img" draggable={false} />
+        <span className="splash-cta">Toca para empezar</span>
+      </button>
+    );
+  }
 
   if (paper) {
     return (
