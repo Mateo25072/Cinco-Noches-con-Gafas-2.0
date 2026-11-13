@@ -82,6 +82,10 @@ export function PlayScreen({
         e.preventDefault();
         engine.toggleDoor("R");
       }
+      if (e.code === "KeyL") {
+        e.preventDefault();
+        engine.toggleLight();
+      }
       if (e.code === "KeyG" || e.code === "KeyV") {
         e.preventDefault();
         engine.toggleGrate();
@@ -216,7 +220,7 @@ export function PlayScreen({
         </div>
 
         <div
-          className={`office-dark ${darkOff ? "is-off" : "is-on"}`}
+          className={`office-dark ${darkOff ? "is-off" : "is-on"} ${snap.officeLight && !snap.cameras && !snap.powerOut ? "is-lit" : ""}`}
           style={{ ["--fx" as string]: `${fx}%` }}
         />
         <div className="scanlines" />
@@ -362,7 +366,7 @@ function CameraTablet({ engine, snap }: { engine: FnafEngine; snap: EngineSnap }
             <button
               key={c.id}
               type="button"
-              className={`cam-btn ${snap.camId === c.id ? "is-on" : ""} ${snap.tortolo === c.id ? "is-warn" : ""}`}
+              className={`cam-btn ${snap.camId === c.id ? "is-on" : ""}`}
               onClick={() => engine.setCam(c.id as CamId)}
             >
               <span className="cam-num">{c.num}</span>
@@ -441,17 +445,9 @@ function Hud({
             short={`míralo ${Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s`}
           />
         ) : null}
-        {snap.tortolo !== "calm" ? (
-          <Alert
-            tone="hint"
-            who="Tórtolo"
-            long={`en cam — destello ${snap.tortoloFlashes}/3 · si no lo miras, se mueve`}
-            short={`cam ${snap.tortoloFlashes}/3`}
-          />
-        ) : null}
       </div>
 
-      <div className="hud-bottom hud-bottom-5">
+      <div className="hud-bottom hud-bottom-6">
         <button
           type="button"
           className={`act ${snap.doorL ? "is-on" : ""} ${lookingL ? "is-focus" : ""}`}
@@ -482,6 +478,14 @@ function Hud({
         </button>
         <button
           type="button"
+          className={`act ${snap.officeLight ? "is-on" : ""}`}
+          disabled={snap.powerOut}
+          onClick={() => engine.toggleLight()}
+        >
+          Luz
+        </button>
+        <button
+          type="button"
           className={`act ${snap.cameras ? "is-on" : ""}`}
           disabled={snap.powerOut}
           onClick={() => engine.setCameras(!snap.cameras)}
@@ -497,7 +501,7 @@ function Hud({
           Puerta D
         </button>
       </div>
-      <p className="hud-hint">Q / E puertas · F parpadea · C cámaras · en el monitor, F o Destello</p>
+      <p className="hud-hint">Q / E puertas · L luz · F linterna · C cámaras · en el monitor, F o Destello</p>
     </div>
   );
 }

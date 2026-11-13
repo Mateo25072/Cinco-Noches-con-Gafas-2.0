@@ -53,6 +53,7 @@ export class FnafEngine {
   hourLen = 50;
   look = 0;
   flashlight = false;
+  officeLight = false;
   cameras = false;
   camId: CamId = "stage";
   doorL = false;
@@ -158,6 +159,7 @@ export class FnafEngine {
       hourLen: this.hourLen,
       look: this.look,
       flashlight: this.flashlight,
+      officeLight: this.officeLight,
       cameras: this.cameras,
       camId: this.camId,
       doorL: this.doorL,
@@ -206,6 +208,7 @@ export class FnafEngine {
     this.hourAcc = 0;
     this.look = 0;
     this.flashlight = false;
+    this.officeLight = false;
     this.cameras = false;
     this.camId = "stage";
     this.doorL = false;
@@ -350,6 +353,14 @@ export class FnafEngine {
       this.doorR = !this.doorR;
       if (this.doorR) this.audio.door();
     }
+    this.emit();
+  }
+
+  toggleLight() {
+    if (this.phase !== "playing" || this.powerOut) return;
+    if (this.battery <= 0) return;
+    this.officeLight = !this.officeLight;
+    this.audio.click();
     this.emit();
   }
 
@@ -575,6 +586,7 @@ export class FnafEngine {
     if (this.doorR) parts.push(0.0035);
     if (this.grate) parts.push(0.0027);
     if (this.flashlight) parts.push(0.0025);
+    if (this.officeLight) parts.push(0.0018);
     if (this.cameras) parts.push(0.0016);
     const n = parts.length;
     const sum = parts.reduce((a, b) => a + b, 0);
@@ -589,6 +601,7 @@ export class FnafEngine {
       this.doorR = false;
       this.grate = false;
       this.flashlight = false;
+      this.officeLight = false;
       this.flashHeld = false;
       this.cameras = false;
       this.audio.camStatic(false);
@@ -1039,6 +1052,7 @@ export class FnafEngine {
     this.jumpscareAcc = 0;
     this.cameras = false;
     this.flashlight = false;
+    this.officeLight = false;
     this.trauma = 1;
     this.deathTip = DEATH_TIPS[who] ?? null;
     this.audio.stopPhone();
@@ -1056,6 +1070,7 @@ export class FnafEngine {
     this.sixAcc = 0;
     this.cameras = false;
     this.flashlight = false;
+    this.officeLight = false;
     this.doorL = false;
     this.doorR = false;
     this.grate = false;

@@ -142,4 +142,19 @@ describe("anti-overlap and team AI", () => {
     }
     assert.ok(["playing", "jumpscare", "sixam", "gameover"].includes(engine.phase as string));
   });
+
+  it("office light toggles, drains battery and goes off with a blackout", () => {
+    const engine = makeEngine();
+    engine.battery = 1;
+    engine.toggleLight();
+    assert.equal(engine.officeLight, true);
+    for (let i = 0; i < 100; i += 1) engine.update(0.1);
+    assert.ok(engine.battery < 1, "light should drain the battery");
+    engine.battery = 0.0001;
+    engine.update(0.1);
+    assert.equal(engine.powerOut, true);
+    assert.equal(engine.officeLight, false);
+    engine.toggleLight();
+    assert.equal(engine.officeLight, false);
+  });
 });

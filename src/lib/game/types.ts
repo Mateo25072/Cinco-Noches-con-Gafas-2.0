@@ -62,6 +62,8 @@ export type EngineSnap = {
   hourLen: number;
   look: number;
   flashlight: boolean;
+  /** Luz fija de la oficina (gasta batería). La linterna alumbra el pasillo. */
+  officeLight: boolean;
   cameras: boolean;
   camId: CamId;
   doorL: boolean;
