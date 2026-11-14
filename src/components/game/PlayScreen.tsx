@@ -420,31 +420,6 @@ function Hud({
         </div>
       ) : null}
 
-      <div className="alert-stack">
-        {snap.gafas === "mouth" ? (
-          <Alert tone="warn" who="Gafas" long="en el conducto izquierdo — cierra la puerta" short="conducto I · cierra" />
-        ) : null}
-        {snap.muecas === "mouth" ? (
-          <Alert tone="warn" who="Muecas" long="en el conducto derecho — cierra la puerta" short="conducto D · cierra" />
-        ) : null}
-        {snap.chaparro === "hall" ? (
-          <Alert
-            tone="hint"
-            who="Chaparro"
-            long={`al fondo — parpadea la linterna ${snap.chapFlashes}/3`}
-            short={`parpadea ${snap.chapFlashes}/3`}
-          />
-        ) : null}
-        {snap.fachero === "office" ? (
-          <Alert
-            tone="warn"
-            who="Fachero"
-            long={`dentro — míralo (${Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s)`}
-            short={`míralo ${Math.max(0, 6.5 - snap.fachLook).toFixed(1)}s`}
-          />
-        ) : null}
-      </div>
-
       <div className="hud-bottom hud-bottom-5">
         <button
           type="button"
@@ -493,25 +468,6 @@ function Hud({
       </div>
       <p className="hud-hint">Q / E puertas · F linterna · C cámaras · en el monitor, F o Destello</p>
     </div>
-  );
-}
-
-function Alert({
-  tone,
-  who,
-  long,
-  short,
-}: {
-  tone: "warn" | "hint";
-  who: string;
-  long: string;
-  short: string;
-}) {
-  return (
-    <p className={`alert-chip ${tone === "warn" ? "warn-flash" : "scream-hint"}`}>
-      <b>{who}</b> <span className="chip-long">{long}</span>
-      <span className="chip-short">{short}</span>
-    </p>
   );
 }
 
