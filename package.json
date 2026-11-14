@@ -3,6 +3,7 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "version": "2.0.1",
   "overrides": {
     "nf3": "0.3.17"
   },
@@ -121,25 +122,21 @@
       "output": "artifacts/windows"
     },
     "publish": null,
-    "files": [
-      "main.mjs"
-    ],
+    "files": ["main.mjs"],
     "extraResources": [
       {
         "from": "dist",
         "to": "dist",
-        "filter": [
-          "**/*"
-        ]
+        "filter": ["**/*"]
       }
     ],
     "win": {
-      "target": [
-        "portable"
-      ]
+      "target": ["portable"]
     },
     "portable": {
       "artifactName": "${productName}-${version}-portable.${ext}"
-    }
+    },
+    "asar": true,
+    "asarUnpack": ["**/*.{mp4,png,jpg,jpeg,gif,svg,webp}"]
   }
 }

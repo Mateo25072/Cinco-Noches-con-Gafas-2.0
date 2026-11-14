@@ -36,6 +36,14 @@ app.whenReady().then(() => {
     ? path.join(process.resourcesPath, "dist")
     : path.resolve(app.getAppPath(), "dist");
 
+  if (!existsSync(path.join(assetRoot, "desktop", "index.html"))) {
+    console.error(
+      "[CNCG] No se encontró dist/desktop/index.html. Ejecuta: npm run build:desktop",
+      "\nRuta buscada:",
+      assetRoot,
+    );
+  }
+
   protocol.handle(APP_SCHEME, async (request) => {
     let targetPath;
     try {
