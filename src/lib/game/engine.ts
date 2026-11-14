@@ -170,6 +170,7 @@ export class FnafEngine {
     this.jumpscare = null;
     this.deathTip = null;
     this.sound.stopAmbient();
+    this.sound.stopPowerOutAmbient();
     this.emit();
   }
 
@@ -244,6 +245,7 @@ export class FnafEngine {
     this.powerOutAcc = 0;
     this.staggerLock = 0;
     this.sound.stopAmbient();
+    this.sound.stopPowerOutAmbient();
     this.emit();
   }
 
@@ -259,6 +261,7 @@ export class FnafEngine {
   finishJumpscare() {
     this.phase = "gameover";
     this.sound.stopAmbient();
+    this.sound.stopPowerOutAmbient();
     this.emit();
   }
 
@@ -375,7 +378,11 @@ export class FnafEngine {
 
     if (this.powerOut) {
       if (this.generatorResetHeld && !this.generatorResetUsed) {
+        const prev = this.generatorResetProgress;
         this.generatorResetProgress = Math.min(3, this.generatorResetProgress + cap);
+        if (Math.floor(this.generatorResetProgress * 3) > Math.floor(prev * 3)) {
+          this.sound.generatorCrank(this.generatorResetProgress / 3);
+        }
         if (this.generatorResetProgress >= 3) {
           this.battery = 0.38;
           this.powerOut = false;
@@ -389,6 +396,7 @@ export class FnafEngine {
             this.fachWatch = 0;
           }
           this.sound.generatorRestart();
+          this.sound.startAmbient();
           this.emit();
         }
       }
@@ -475,6 +483,7 @@ export class FnafEngine {
       this.doorL = false;
       this.doorR = false;
       this.grate = false;
+      this.sound.stopAmbient();
       this.sound.powerDown();
       this.emit();
     }
@@ -489,6 +498,7 @@ export class FnafEngine {
       if (this.hour >= 6) {
         this.phase = "sixam";
         this.sound.stopAmbient();
+        this.sound.stopPowerOutAmbient();
         this.sound.sixAm();
         this.persistWin();
         this.emit();
@@ -804,6 +814,7 @@ export class FnafEngine {
     this.phase = "jumpscare";
     this.deathTip = DEATH_TIPS[who] ?? null;
     this.sound.stopAmbient();
+    this.sound.stopPowerOutAmbient();
     this.canContinue = true;
     writeSave({
       beaten: this.beaten,
