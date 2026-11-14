@@ -12,7 +12,8 @@
     "build": "node scripts/with-app-env.mjs vite build && npm run db:migrate",
     "build:desktop": "node scripts/with-app-env.mjs node node_modules/vite/bin/vite.js build --config vite.desktop.config.ts --mode desktop",
     "desktop:dev": "npm run build:desktop && electron .",
-    "desktop:dist": "npm run build:desktop && npm run check:desktop && electron-builder --win portable --publish never",
+    "desktop:dist": "npm run build:desktop && npm run check:desktop && electron-builder --win portable nsis --publish never",
+    "desktop:dir": "npm run build:desktop && npm run check:desktop && electron-builder --win dir --publish never",
     "check:desktop": "node scripts/check-desktop-build.mjs",
     "build:android:web": "node scripts/with-app-env.mjs node node_modules/vite/bin/vite.js build --config vite.android.config.ts --mode desktop",
     "android:sync": "npm run build:android:web && cap sync android",
@@ -117,6 +118,7 @@
   "build": {
     "appId": "com.cinconoches.gafas",
     "productName": "Cinco Noches con Gafas",
+    "copyright": "Copyright © Mateo25072",
     "directories": {
       "app": "desktop/app",
       "output": "artifacts/windows"
@@ -130,13 +132,28 @@
         "filter": ["**/*"]
       }
     ],
+    "asar": true,
+    "asarUnpack": ["**/*.{mp4,png,jpg,jpeg,gif,svg,webp,woff,woff2}"],
     "win": {
-      "target": ["portable"]
+      "target": [
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "artifactName": "CincoNochesConGafas-${version}-${os}-${arch}.${ext}",
+      "executableName": "CincoNochesConGafas",
+      "requestedExecutionLevel": "asInvoker"
     },
     "portable": {
-      "artifactName": "${productName}-${version}-portable.${ext}"
+      "artifactName": "CincoNochesConGafas-${version}-portable.${ext}"
     },
-    "asar": true,
-    "asarUnpack": ["**/*.{mp4,png,jpg,jpeg,gif,svg,webp}"]
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Cinco Noches con Gafas",
+      "uninstallDisplayName": "Cinco Noches con Gafas",
+      "artifactName": "CincoNochesConGafas-${version}-setup.${ext}"
+    }
   }
 }
