@@ -62,7 +62,6 @@ export function GameApp() {
 
   const unlock = () => audio.unlock();
 
-
   const toggleMute = () => {
     const next = !muted;
     setMuted(next);
@@ -168,6 +167,16 @@ export function GameApp() {
   return (
     <div className={`menu menu-fnaf ${reducedMotion ? "reduce-motion" : ""}`} onPointerDown={unlock}>
       <img src={ASSETS.menuGif} alt="Five Nights on Board" className="fnaf-gif" draggable={false} />
+      <div className="menu-splash" aria-hidden="true">
+        <div className="menu-splash-inner">
+          <p className="menu-splash-kicker">Presenta</p>
+          <h1 className="menu-splash-title">
+            Cinco Noches
+            <span>con Gafas</span>
+          </h1>
+          <p className="menu-splash-hint">No apagues la linterna…</p>
+        </div>
+      </div>
 
       <div className="fnaf-menu">
         <Stars beaten={snap.beaten} night6={snap.night6Unlocked && snap.beaten >= 5} custom={snap.custom20} />
@@ -203,7 +212,9 @@ export function GameApp() {
           {settings ? (
             <div className="settings-panel">
               <label className="settings-control">
-                <span>Volumen <strong>{Math.round(volume * 100)}%</strong></span>
+                <span>
+                  Volumen <strong>{Math.round(volume * 100)}%</strong>
+                </span>
                 <input
                   type="range"
                   min={0}
@@ -231,7 +242,7 @@ export function GameApp() {
               <li>Tórtolo está en alguna cámara. Tres destellos (botón Destello o F) lo calman. Si no, entra y mata.</li>
               <li>La noche dura 5 minutos. La batería baja despacio, más rápido si dejas varias cosas encendidas.</li>
               <li>CAM 10 (Cocina) y CAM 11 (Almacén) tienen señuelos: golpea ollas para alejar a Gafas o usa la campana para distraer a Muecas. Cuestan 8% de batería y tardan en recargarse.</li>
-              <li>Si ocurre un apagón, mantén R durante 3 segundos. El reinicio devuelve 28% de batería y solo puede usarse una vez por noche.</li>
+              <li>Si ocurre un apagón, mantén R durante 3 segundos. El reinicio devuelve batería y solo puede usarse una vez por noche.</li>
             </ul>
           ) : null}
           <FnafItem onClick={closeOverlay}>Volver</FnafItem>
