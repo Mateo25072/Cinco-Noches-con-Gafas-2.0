@@ -21,6 +21,8 @@ export class GameAudio {
   private phoneUtter: SpeechSynthesisUtterance | null = null;
   private voicesReady = false;
   private ambientTimer: number | null = null;
+  private powerOutHum: Tone | null = null;
+  private powerOutTick: number | null = null;
   private threatLevel = 0;
   private lastAmbientEvent = 0;
 
@@ -332,23 +334,39 @@ export class GameAudio {
 
   generatorRestart() {
     this.unlock();
+    this.stopPowerOutAmbient();
     if (!this.ctx || !this.sfxBus) return;
     const now = this.ctx.currentTime;
-    [90, 135, 190].forEach((frequency, i) => {
+    const sfx = this.sfxBus;
+
+    [90, 135, 190, 260].forEach((frequency, i) => {
       const oscillator = this.ctx!.createOscillator();
       const gain = this.ctx!.createGain();
-      const start = now + i * 0.16;
+      const start = now + i * 0.14;
       oscillator.type = "sawtooth";
       oscillator.frequency.setValueAtTime(frequency, start);
-      oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.8, start + 0.18);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.85, start + 0.2);
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.09, start + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.32);
+      gain.gain.exponentialRampToValueAtTime(0.1, start + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.36);
       oscillator.connect(gain);
-      gain.connect(this.sfxBus!);
+      gain.connect(sfx);
       oscillator.start(start);
-      oscillator.stop(start + 0.34);
+      oscillator.stop(start + 0.38);
     });
+
+    const hum = this.ctx.createOscillator();
+    const hg = this.ctx.createGain();
+    hum.type = "sine";
+    hum.frequency.setValueAtTime(55, now + 0.5);
+    hum.frequency.exponentialRampToValueAtTime(120, now + 1.1);
+    hg.gain.setValueAtTime(0.0001, now + 0.5);
+    hg.gain.exponentialRampToValueAtTime(0.07, now + 0.65);
+    hg.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+    hum.connect(hg);
+    hg.connect(sfx);
+    hum.start(now + 0.5);
+    hum.stop(now + 1.45);
   }
 
   private playMetalHit(frequency: number) {
@@ -621,97 +639,15 @@ export class GameAudio {
     });
   }
 
-  speak(lines: string[], onLine: (i: number) => void, onEnd: () => void) {
-    this.stopPhone();
-    if (typeof window === "undefined" || !window.speechSynthesis) {
-      onEnd();
-      return;
-    }
-
-    const startSpeaking = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const es =
-        voices.find((v) => v.lang.toLowerCase().startsWith("es")) ??
-        voices.find((v) => v.lang.toLowerCase().includes("spanish")) ??
-        voices.find((v) => v.lang.toLowerCase().startsWith("en")) ??
-        voices[0] ??
-        null;
-
-      let i = 0;
-      const next = () => {
-        if (i >= lines.length) {
-          this.phoneUtter = null;
-          onEnd();
-          return;
-        }
-        onLine(i);
-        const u = new SpeechSynthesisUtterance(lines[i]);
-        u.rate = 0.88;
-        u.pitch = 0.72;
-        u.volume = this.muted ? 0 : 0.95;
-        if (es) u.voice = es;
-        u.lang = es?.lang ?? "es-ES";
-
-        u.onend = () => {
-          i += 1;
-          window.setTimeout(next, 280);
-        };
-        u.onerror = () => {
-          i += 1;
-          window.setTimeout(next, 100);
-        };
-
-        this.phoneUtter = u;
-        try {
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.speak(u);
-        } catch {
-          i += 1;
-          next();
-        }
-      };
-      next();
-    };
-
-    const currentVoices = window.speechSynthesis.getVoices();
-    if (currentVoices.length === 0) {
-      let started = false;
-      const onVoicesChanged = () => {
-        if (started) return;
-        started = true;
-        window.speechSynthesis.removeEventListener("voiceschanged", onVoicesChanged);
-        startSpeaking();
-      };
-      window.speechSynthesis.addEventListener("voiceschanged", onVoicesChanged);
-      window.setTimeout(() => {
-        if (started) return;
-        started = true;
-        window.speechSynthesis.removeEventListener("voiceschanged", onVoicesChanged);
-        startSpeaking();
-      }, 1800);
-    } else {
-      startSpeaking();
-    }
-  }
-
-  stopPhone() {
-    try {
-      window.speechSynthesis?.cancel();
-    } catch {
-      /* */
-    }
-    this.phoneUtter = null;
-  }
-
   door() {
     this.unlock();
     if (!this.ctx || !this.sfxBus) return;
-    const src = noiseSource(this.ctx, 0.18);
+    const src = noiseSource(this.ctx, 0.2);
     const f = this.ctx.createBiquadFilter();
     f.type = "lowpass";
-    f.frequency.value = 220;
+    f.frequency.value = 400;
     const g = this.ctx.createGain();
-    g.gain.value = 0.28;
+    g.gain.value = 0.14;
     g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
     src.connect(f);
     f.connect(g);
@@ -721,68 +657,170 @@ export class GameAudio {
   }
 
   grate() {
-    this.unlock();
-    if (!this.ctx || !this.sfxBus) return;
-    const o = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    o.type = "square";
-    o.frequency.setValueAtTime(180, this.ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(70, this.ctx.currentTime + 0.16);
-    g.gain.value = 0.09;
-    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
-    o.connect(g);
-    g.connect(this.sfxBus);
-    o.start();
-    o.stop(this.ctx.currentTime + 0.2);
+    this.door();
   }
 
-  smoke() {
-    this.unlock();
-    if (!this.ctx || !this.sfxBus) return;
-    const src = noiseSource(this.ctx, 0.8);
-    const f = this.ctx.createBiquadFilter();
-    f.type = "lowpass";
-    f.frequency.value = 400;
-    const g = this.ctx.createGain();
-    g.gain.value = 0.16;
-    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.8);
-    src.connect(f);
-    f.connect(g);
-    g.connect(this.sfxBus);
-    src.start();
-    src.stop(this.ctx.currentTime + 0.82);
+  strobe() {
+    this.burstStatic();
   }
 
-  blind() {
+  phone() {
     this.unlock();
-    if (!this.ctx || !this.sfxBus) return;
-    const o = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    o.type = "sawtooth";
-    o.frequency.setValueAtTime(1400, this.ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(240, this.ctx.currentTime + 0.4);
-    g.gain.value = 0.14;
-    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
-    o.connect(g);
-    g.connect(this.sfxBus);
-    o.start();
-    o.stop(this.ctx.currentTime + 0.46);
+  }
+
+  stopPhone() {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    this.phoneUtter = null;
+  }
+
+  speak(_lines: string[]) {
+    /* phone lines handled by engine if needed */
   }
 
   powerDown() {
     this.unlock();
     if (!this.ctx || !this.sfxBus) return;
+    const now = this.ctx.currentTime;
+    const sfx = this.sfxBus;
+
     const o = this.ctx.createOscillator();
     const g = this.ctx.createGain();
-    o.type = "sine";
-    o.frequency.setValueAtTime(180, this.ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 1.4);
-    g.gain.value = 0.18;
-    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.5);
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(220, now);
+    o.frequency.exponentialRampToValueAtTime(28, now + 1.55);
+    g.gain.setValueAtTime(0.16, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 1.7);
+    o.connect(g);
+    g.connect(sfx);
+    o.start(now);
+    o.stop(now + 1.72);
+
+    const noise = noiseSource(this.ctx, 0.55);
+    const nf = this.ctx.createBiquadFilter();
+    nf.type = "lowpass";
+    nf.frequency.setValueAtTime(2400, now);
+    nf.frequency.exponentialRampToValueAtTime(180, now + 0.45);
+    const ng = this.ctx.createGain();
+    ng.gain.setValueAtTime(0.22, now);
+    ng.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    noise.connect(nf);
+    nf.connect(ng);
+    ng.connect(sfx);
+    noise.start(now);
+    noise.stop(now + 0.58);
+
+    [0.08, 0.22, 0.38].forEach((t, i) => {
+      const click = this.ctx!.createOscillator();
+      const cg = this.ctx!.createGain();
+      click.type = "square";
+      click.frequency.value = 80 + i * 40;
+      const start = now + t;
+      cg.gain.setValueAtTime(0.0001, start);
+      cg.gain.exponentialRampToValueAtTime(0.12, start + 0.004);
+      cg.gain.exponentialRampToValueAtTime(0.001, start + 0.05);
+      click.connect(cg);
+      cg.connect(sfx);
+      click.start(start);
+      click.stop(start + 0.06);
+    });
+
+    this.startPowerOutAmbient();
+  }
+
+  startPowerOutAmbient() {
+    this.unlock();
+    this.stopPowerOutAmbient();
+    if (!this.ctx || !this.sfxBus) return;
+    const ctx = this.ctx;
+    const sfx = this.sfxBus;
+
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = 42;
+    const osc2 = ctx.createOscillator();
+    osc2.type = "triangle";
+    osc2.frequency.value = 63;
+    const g = ctx.createGain();
+    g.gain.value = 0.045;
+    osc.connect(g);
+    osc2.connect(g);
+    g.connect(sfx);
+    osc.start();
+    osc2.start();
+    this.powerOutHum = {
+      stop: () => {
+        try {
+          osc.stop();
+          osc2.stop();
+        } catch {
+          /* */
+        }
+        osc.disconnect();
+        osc2.disconnect();
+        g.disconnect();
+      },
+    };
+
+    const scheduleCreep = () => {
+      if (!this.powerOutHum || !this.ctx || !this.sfxBus) return;
+      const t = this.ctx.currentTime;
+      const noise = noiseSource(this.ctx, 0.25);
+      const f = this.ctx.createBiquadFilter();
+      f.type = "bandpass";
+      f.frequency.value = 350 + Math.random() * 900;
+      f.Q.value = 4;
+      const ng = this.ctx.createGain();
+      ng.gain.setValueAtTime(0.0001, t);
+      ng.gain.exponentialRampToValueAtTime(0.06 + Math.random() * 0.05, t + 0.02);
+      ng.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      noise.connect(f);
+      f.connect(ng);
+      ng.connect(this.sfxBus);
+      noise.start(t);
+      noise.stop(t + 0.3);
+      this.powerOutTick = window.setTimeout(scheduleCreep, 1800 + Math.random() * 3200);
+    };
+    this.powerOutTick = window.setTimeout(scheduleCreep, 900);
+  }
+
+  stopPowerOutAmbient() {
+    if (this.powerOutTick != null) {
+      window.clearTimeout(this.powerOutTick);
+      this.powerOutTick = null;
+    }
+    this.powerOutHum?.stop();
+    this.powerOutHum = null;
+  }
+
+  generatorCrank(progress01: number) {
+    this.unlock();
+    if (!this.ctx || !this.sfxBus) return;
+    const now = this.ctx.currentTime;
+    const p = Math.min(1, Math.max(0, progress01));
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(55 + p * 40, now);
+    o.frequency.linearRampToValueAtTime(70 + p * 55, now + 0.12);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.04 + p * 0.05, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
     o.connect(g);
     g.connect(this.sfxBus);
-    o.start();
-    o.stop(this.ctx.currentTime + 1.52);
+    o.start(now);
+    o.stop(now + 0.15);
+
+    if (p > 0.55) {
+      const n = noiseSource(this.ctx, 0.12);
+      const ng = this.ctx.createGain();
+      ng.gain.value = 0.03 * p;
+      n.connect(ng);
+      ng.connect(this.sfxBus);
+      n.start(now);
+      n.stop(now + 0.12);
+    }
   }
 
   setScreamLoop(level: number) {
@@ -828,36 +866,35 @@ export class GameAudio {
   dispose() {
     this.stopPhone();
     this.stopAmbient();
+    this.stopPowerOutAmbient();
     this.stopMusicBox();
-    this.setScreamLoop(0);
     this.staticNode?.stop();
-    void this.ctx?.close();
+    this.screamNode?.stop();
+    if (this.ctx) void this.ctx.close();
     this.ctx = null;
   }
 }
 
-function noiseSource(ctx: AudioContext, seconds: number): AudioBufferSourceNode {
-  const len = Math.max(1, Math.floor(ctx.sampleRate * seconds));
-  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+function noiseSource(ctx: AudioContext, seconds: number) {
+  const buffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * seconds)), ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
   const src = ctx.createBufferSource();
-  src.buffer = buf;
-  src.loop = seconds > 0.8;
-  src.playbackRate.value = 0.95 + Math.random() * 0.1;
+  src.buffer = buffer;
   return src;
 }
 
 function pluck(ctx: AudioContext, dest: AudioNode, freq: number, dur: number, vol: number) {
   const o = ctx.createOscillator();
   const g = ctx.createGain();
-  o.type = "sine";
+  o.type = "triangle";
   o.frequency.value = freq;
-  const now = ctx.currentTime;
-  g.gain.setValueAtTime(vol, now);
-  g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  const t = ctx.currentTime;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g);
   g.connect(dest);
-  o.start(now);
-  o.stop(now + dur + 0.02);
+  o.start(t);
+  o.stop(t + dur + 0.02);
 }
