@@ -498,13 +498,8 @@ button, input { font: inherit; }
 }
 .cam-num { display: block; font-size: 0.7rem; color: var(--color-muted); }
 
-/* Luz de la oficina */
-.hud-bottom-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-.office-dark.is-off.is-lit { background: rgb(0 0 0 / 0.34); }
+/* Lámpara fija de la oficina: siempre alumbra; la linterna ilumina el pasillo */
+.office-dark.is-off.is-lit { background: rgb(0 0 0 / var(--lit, 0.34)); }
 .office-dark.is-on.is-lit {
-  background: radial-gradient(circle at var(--fx, 50%) 58%, rgb(255 236 180 / 0.1) 0%, rgb(0 0 0 / 0.08) 24%, rgb(0 0 0 / 0.38) 62%, rgb(0 0 0 / 0.55) 100%);
-}
-@media (max-width: 720px) { .hud-bottom-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-height: 520px) and (orientation: landscape) {
-  .hud-bottom-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  background: radial-gradient(circle at var(--fx, 50%) 58%, rgb(255 236 180 / 0.1) 0%, rgb(0 0 0 / 0.08) 24%, rgb(0 0 0 / calc(var(--lit, 0.34) + 0.04)) 62%, rgb(0 0 0 / calc(var(--lit, 0.34) + 0.2)) 100%);
 }

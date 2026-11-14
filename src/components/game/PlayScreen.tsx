@@ -82,10 +82,6 @@ export function PlayScreen({
         e.preventDefault();
         engine.toggleDoor("R");
       }
-      if (e.code === "KeyL") {
-        e.preventDefault();
-        engine.toggleLight();
-      }
       if (e.code === "KeyG" || e.code === "KeyV") {
         e.preventDefault();
         engine.toggleGrate();
@@ -133,6 +129,8 @@ export function PlayScreen({
   const fx = 50 + snap.look * 32;
   const beam = snap.flashlight && snap.flicker < 0.5;
   const darkOff = snap.cameras || !beam || snap.powerOut;
+  // La lámpara de la oficina se apaga poco a poco cuando la batería está a punto de acabarse.
+  const lampDark = (0.34 + Math.max(0, 0.22 - snap.battery) * 2.2).toFixed(2);
 
   const threat = Math.max(
     snap.gafas === "mouth" ? 1 : snap.gafas === "ventL" || snap.gafas === "kitchen" ? 0.7 : 0,
@@ -220,8 +218,8 @@ export function PlayScreen({
         </div>
 
         <div
-          className={`office-dark ${darkOff ? "is-off" : "is-on"} ${snap.officeLight && !snap.cameras && !snap.powerOut ? "is-lit" : ""}`}
-          style={{ ["--fx" as string]: `${fx}%` }}
+          className={`office-dark ${darkOff ? "is-off" : "is-on"} ${snap.cameras || snap.powerOut ? "" : "is-lit"}`}
+          style={{ ["--fx" as string]: `${fx}%`, ["--lit" as string]: lampDark }}
         />
         <div className="scanlines" />
         {snap.staticAmt > 0.08 && !snap.cameras ? (
@@ -447,7 +445,7 @@ function Hud({
         ) : null}
       </div>
 
-      <div className="hud-bottom hud-bottom-6">
+      <div className="hud-bottom hud-bottom-5">
         <button
           type="button"
           className={`act ${snap.doorL ? "is-on" : ""} ${lookingL ? "is-focus" : ""}`}
@@ -478,14 +476,6 @@ function Hud({
         </button>
         <button
           type="button"
-          className={`act ${snap.officeLight ? "is-on" : ""}`}
-          disabled={snap.powerOut}
-          onClick={() => engine.toggleLight()}
-        >
-          Luz
-        </button>
-        <button
-          type="button"
           className={`act ${snap.cameras ? "is-on" : ""}`}
           disabled={snap.powerOut}
           onClick={() => engine.setCameras(!snap.cameras)}
@@ -501,7 +491,7 @@ function Hud({
           Puerta D
         </button>
       </div>
-      <p className="hud-hint">Q / E puertas · L luz · F linterna · C cámaras · en el monitor, F o Destello</p>
+      <p className="hud-hint">Q / E puertas · F linterna · C cámaras · en el monitor, F o Destello</p>
     </div>
   );
 }
