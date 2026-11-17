@@ -346,12 +346,21 @@ function CameraTablet({ engine, snap }: { engine: FnafEngine; snap: EngineSnap }
     (snap.camId === "games" && snap.fachero === "games") ||
     (snap.camId === "hall" && snap.fachero === "hall");
   const tortoloHere = snap.tortolo !== "calm" && snap.camId === snap.tortolo;
+  const hot = new Set<string>();
+  if (snap.gafas === "stage" || snap.gafas === "party" || snap.gafas === "kitchen" || snap.gafas === "ventL") hot.add(snap.gafas);
+  if (snap.gafas === "mouth") hot.add("ventL");
+  if (snap.muecas === "games" || snap.muecas === "storage" || snap.muecas === "cove" || snap.muecas === "ventR") hot.add(snap.muecas);
+  if (snap.muecas === "mouth") hot.add("ventR");
+  if (snap.chaparro === "hall") hot.add("hall");
+  if (snap.fachero === "parts" || snap.fachero === "games" || snap.fachero === "hall") hot.add(snap.fachero);
+  if (snap.tortolo !== "calm") hot.add(snap.tortolo);
 
   return (
     <div className="tablet" data-ui>
       <div className="tablet-bezel">
         <div className={`tablet-feed ${snap.camId === "ventL" || snap.camId === "ventR" ? "nv" : ""}`}>
           <img src={src} alt="" draggable={false} />
+          <div className="feed-frame" aria-hidden="true" />
           {gafasHere ? <Face who="gafas" className="face-cam" /> : null}
           {gafasKitchen ? <Face who="gafas" className="face-cam" /> : null}
           {muecasHere ? <Face who="muecas" className="face-cam" /> : null}
@@ -365,12 +374,12 @@ function CameraTablet({ engine, snap }: { engine: FnafEngine; snap: EngineSnap }
             <div className="cam-tear" style={{ top: `${18 + ((snap.staticAmt * 57) % 62)}%` }} />
           ) : null}
           <div className="tablet-meta">
-            <span className="rec">REC</span>
-            <span>
-              CAM {cam?.num} {cam?.name}
-              {tortoloHere ? ` · Tórtolo ${snap.tortoloFlashes}/3` : ""}
-            </span>
+            <span className="rec"><i /> REC</span>
+            <span className="cam-id">CAM {cam?.num}</span>
+            <span className="cam-name">{cam?.name}</span>
+            {tortoloHere ? <span className="cam-tag">Tórtolo {snap.tortoloFlashes}/3</span> : null}
           </div>
+          <div className="feed-clock">{HOURS[Math.min(6, snap.hour)] ?? "12 AM"}</div>
           <button type="button" className="wind-btn" onClick={() => engine.strobeCam()}>
             Destello
           </button>
@@ -389,22 +398,26 @@ function CameraTablet({ engine, snap }: { engine: FnafEngine; snap: EngineSnap }
             </button>
           ) : null}
         </div>
-        <div className="cam-map">
-          {CAM_LIST.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className={`cam-btn ${snap.camId === c.id ? "is-on" : ""}`}
-              onClick={() => engine.setCam(c.id as CamId)}
-            >
-              <span className="cam-num">{c.num}</span>
-              <span>{c.name}</span>
-            </button>
-          ))}
+        <aside className="cam-map">
+          <p className="map-title">Monitor</p>
+          <div className="cam-grid">
+            {CAM_LIST.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className={`cam-btn ${snap.camId === c.id ? "is-on" : ""} ${hot.has(c.id) ? "is-hot" : ""}`}
+                onClick={() => engine.setCam(c.id as CamId)}
+              >
+                <span className="cam-num">{c.num}</span>
+                <span className="cam-label">{c.name}</span>
+                {hot.has(c.id) ? <span className="cam-dot" aria-hidden="true" /> : null}
+              </button>
+            ))}
+          </div>
           <button type="button" className="cam-close" onClick={() => engine.setCameras(false)}>
             Bajar tablet
           </button>
-        </div>
+        </aside>
       </div>
     </div>
   );
