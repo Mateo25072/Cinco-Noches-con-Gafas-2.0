@@ -1,5 +1,5 @@
 import { useEffect, useRef, type PointerEvent, type ReactNode } from "react";
-import { ASSETS, CAM_LIST } from "@/lib/game/config";
+import { ASSETS, CAM_LIST, PHONE } from "@/lib/game/config";
 import type { FnafEngine } from "@/lib/game/engine";
 import type { CamId, EngineSnap, ThreatId } from "@/lib/game/types";
 
@@ -443,7 +443,7 @@ function Hud({
 
       {snap.phoneOn ? (
         <div className="phone">
-          <p>Teléfono — línea {snap.phoneLine + 1}</p>
+          <p>{PHONE[snap.night]?.[snap.phoneLine] ?? "Línea cortada."}</p>
           <button type="button" onClick={() => engine.skipPhone()}>
             Colgar
           </button>

@@ -173,7 +173,7 @@ button, input { font: inherit; }
 .hud-hint { position: absolute; bottom: 6px; left: 12px; right: 12px; margin: 0; text-align: center; font-size: 0.7rem; color: var(--color-muted); }
 
 .jumpscare { position: absolute; inset: 0; z-index: 30; background: #000; overflow: hidden; }
-.jumpscare video, .jumpscare img { width: 100%; height: 100%; object-fit: cover; animation: scare 0.12s steps(2, end) infinite; }
+.jumpscare video, .jumpscare img:not(.jumpscare-peek) { width: 100%; height: 100%; object-fit: cover; animation: scare 0.12s steps(2, end) infinite; }
 @keyframes scare { to { transform: translate(2%, -1%) scale(1.08); } }
 
 .end-card, .intro-card {
@@ -616,3 +616,14 @@ button, input { font: inherit; }
 .reduce-motion .six-clock span { animation: none; }
 .reduce-motion .end-card.six-am h2,
 .reduce-motion .end-card.six-am .end-actions { opacity: 1; animation: none; }
+
+.jumpscare .jumpscare-peek {
+  width: auto;
+  height: auto;
+  max-width: 70%;
+  max-height: 78%;
+  margin: auto;
+  pointer-events: none;
+  animation: peek-in 0.48s steps(3, end) forwards;
+}
+.phone p { margin: 0; max-width: 46ch; line-height: 1.35; }

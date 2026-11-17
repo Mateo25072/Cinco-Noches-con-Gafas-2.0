@@ -675,8 +675,24 @@ export class GameAudio {
     this.phoneUtter = null;
   }
 
-  speak(_lines: string[]) {
-    /* phone lines handled by engine if needed */
+  speak(lines: string[]) {
+    this.unlock();
+    if (this.muted) return;
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const text = lines.map((line) => line.trim()).filter(Boolean).join(" ");
+    if (!text) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "es-MX";
+    utter.rate = 0.96;
+    utter.pitch = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const voice =
+      voices.find((v) => v.lang.toLowerCase().startsWith("es-mx")) ??
+      voices.find((v) => v.lang.toLowerCase().startsWith("es"));
+    if (voice) utter.voice = voice;
+    this.phoneUtter = utter;
+    window.speechSynthesis.speak(utter);
   }
 
   powerDown() {

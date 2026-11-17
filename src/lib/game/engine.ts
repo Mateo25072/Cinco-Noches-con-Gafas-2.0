@@ -57,6 +57,7 @@ export class FnafEngine {
   generatorResetUsed = false;
   phoneOn = false;
   phoneLine = 0;
+  phoneAcc = 0;
   staticAmt = 0;
   flicker = 0;
   panic = 0;
@@ -212,6 +213,8 @@ export class FnafEngine {
     this.generatorResetUsed = false;
     this.phoneOn = false;
     this.phoneLine = 0;
+    this.phoneAcc = 0;
+    this.sound.stopPhone();
     this.staticAmt = 0;
     this.flicker = 0;
     this.panic = 0;
@@ -251,9 +254,14 @@ export class FnafEngine {
 
   private beginPlay() {
     this.phase = "playing";
-    this.phoneOn = this.night >= 1 && this.night <= 6;
+    const lines = PHONE[this.night] ?? [];
+    this.phoneOn = lines.length > 0 && this.night >= 1 && this.night <= 6;
     this.phoneLine = 0;
-    if (this.phoneOn) this.sound.phone();
+    this.phoneAcc = 0;
+    if (this.phoneOn) {
+      this.sound.phone();
+      this.sound.speak([lines[0]!]);
+    }
     this.sound.startAmbient();
     this.emit();
   }
@@ -318,6 +326,8 @@ export class FnafEngine {
 
   skipPhone() {
     this.phoneOn = false;
+    this.phoneAcc = 0;
+    this.sound.stopPhone();
     this.emit();
   }
 
@@ -410,6 +420,8 @@ export class FnafEngine {
       this.tickFachero(cap);
 
       this.powerOutAcc += cap;
+      if (this.phoneOn) this.skipPhone();
+      this.tickHour(cap);
       if (this.powerOutAcc > 11) {
         this.kill(this.fachero === "office" || this.fachero === "hall" ? "fachero" : "gafas");
       }
@@ -461,8 +473,30 @@ export class FnafEngine {
     this.tickFachero(cap);
     this.tickTortolo(cap);
     this.tickBattery(cap);
+    this.tickPhone(cap);
     this.tickHour(cap);
     this.tickAtmosphere(cap);
+  }
+
+  private tickPhone(dt: number) {
+    if (!this.phoneOn || this.powerOut) return;
+    const lines = PHONE[this.night] ?? [];
+    if (lines.length === 0) {
+      this.phoneOn = false;
+      return;
+    }
+    this.phoneAcc += dt;
+    const line = lines[this.phoneLine] ?? "";
+    const wait = Math.min(12, 2.8 + line.length * 0.04);
+    if (this.phoneAcc < wait) return;
+    this.phoneAcc = 0;
+    this.phoneLine += 1;
+    if (this.phoneLine >= lines.length) {
+      this.phoneOn = false;
+      this.sound.stopPhone();
+      return;
+    }
+    this.sound.speak([lines[this.phoneLine]!]);
   }
 
   private tickBattery(dt: number) {
