@@ -484,3 +484,135 @@ button, input { font: inherit; }
 }
 .reduce-motion .menu-splash { animation-duration: 0.8s; }
 .reduce-motion .menu-splash-inner { animation: none; }
+
+/* --- original motion: door, camera, peek, 6am, fan --- */
+.door-shut {
+  animation: door-slam 0.32s cubic-bezier(0.18, 0.84, 0.22, 1) both;
+  box-shadow: inset 0 0 48px #000, inset 10px 0 0 rgb(78 66 50 / 0.55);
+}
+.door-shut::after {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 0;
+  height: 10px;
+  background: linear-gradient(#6a5a42, #1a1612);
+  transform-origin: bottom;
+  animation: door-hit 0.14s 0.24s both;
+}
+@keyframes door-slam {
+  0% { transform: translateY(-108%); }
+  68% { transform: translateY(3%); }
+  84% { transform: translateY(-1.2%); }
+  100% { transform: translateY(0); }
+}
+@keyframes door-hit {
+  0% { opacity: 1; transform: scaleY(1.4); }
+  100% { opacity: 0.25; transform: scaleY(0.5); }
+}
+.grate-shut { animation: grate-slam 0.24s ease-out both; }
+@keyframes grate-slam {
+  0% { transform: translateX(-120%); }
+  70% { transform: translateX(3%); }
+  100% { transform: translateX(0); }
+}
+.office-fan {
+  position: absolute;
+  left: 7%;
+  top: 9%;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgb(90 78 60 / 0.85);
+  background: repeating-conic-gradient(from 0deg, #322a22 0 14deg, #0c0b09 14deg 28deg);
+  box-shadow: inset 0 0 8px #000, 0 0 0 6px rgb(18 15 12 / 0.65);
+  animation: fan-spin 0.42s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+.office-fan.is-dead { animation: fan-die 1.5s ease-out forwards; filter: brightness(0.35); }
+@keyframes fan-spin { to { transform: rotate(360deg); } }
+@keyframes fan-die { to { transform: rotate(70deg); } }
+.office-bulb {
+  position: absolute;
+  left: 47%;
+  top: 0;
+  width: 7%;
+  height: 22px;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(ellipse at 50% 100%, rgb(255 228 160 / 0.85), transparent 72%);
+  animation: bulb-flick 5.2s steps(1, end) infinite;
+}
+@keyframes bulb-flick {
+  0%, 88%, 100% { opacity: 0.28; }
+  89% { opacity: 0.02; }
+  91% { opacity: 0.85; }
+  92% { opacity: 0.08; }
+  94% { opacity: 0.4; }
+}
+.cam-switch {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.55) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.45) 0 3px, transparent 3px 8px);
+  mix-blend-mode: screen;
+  animation: cam-sweep 0.32s steps(5, end) both;
+}
+@keyframes cam-sweep {
+  0% { opacity: 1; transform: translateX(-18%); }
+  100% { opacity: 0; transform: translateX(12%); }
+}
+.jumpscare .jumpscare-peek {
+  position: absolute;
+  inset: 8% 18% 10%;
+  z-index: 5;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: transparent;
+  animation: peek-in 0.48s steps(3, end) both;
+  filter: contrast(1.3) saturate(0.75);
+}
+.jumpscare video {
+  animation: video-in 0.12s 0.42s both, scare 0.12s 0.48s steps(2, end) infinite;
+}
+@keyframes peek-in {
+  0% { opacity: 0; transform: scale(0.72) translateY(14%); }
+  25% { opacity: 1; transform: scale(0.94) translateY(2%); }
+  70% { opacity: 1; transform: scale(1.06) translateY(0); }
+  100% { opacity: 0; transform: scale(1.28) translateY(-4%); }
+}
+@keyframes video-in { from { opacity: 0; } to { opacity: 1; } }
+.end-card.six-am h2,
+.end-card.six-am .end-actions,
+.end-card.six-am .death-tip {
+  opacity: 0;
+  animation: six-reveal 0.35s 1.65s ease forwards;
+}
+.six-clock {
+  position: relative;
+  height: 1.15em;
+  margin: 0 auto;
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 12vw, 6.4rem);
+  line-height: 1;
+}
+.six-clock span { position: absolute; left: 0; right: 0; }
+.six-clock span:first-child { animation: six-out 0.45s 0.85s ease forwards; }
+.six-flip { opacity: 0; color: var(--color-accent); animation: six-in 0.28s 1.25s steps(2, end) forwards; }
+@keyframes six-out { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes six-in { to { opacity: 1; } }
+@keyframes six-reveal { to { opacity: 1; } }
+.reduce-motion .door-shut,
+.reduce-motion .grate-shut,
+.reduce-motion .office-fan,
+.reduce-motion .cam-switch,
+.reduce-motion .jumpscare-peek,
+.reduce-motion .six-clock span { animation: none; }
+.reduce-motion .end-card.six-am h2,
+.reduce-motion .end-card.six-am .end-actions { opacity: 1; animation: none; }

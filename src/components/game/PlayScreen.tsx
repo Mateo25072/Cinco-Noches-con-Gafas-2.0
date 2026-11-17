@@ -213,8 +213,8 @@ export function PlayScreen({
                 )}
               </div>
             ) : null}
-            {snap.doorL ? <div className="door-shut" /> : null}
-            {snap.grate ? <div className="grate-shut" /> : null}
+            {snap.doorL ? <div className="door-shut" key="door-l" /> : null}
+            {snap.grate ? <div className="grate-shut" key="grate" /> : null}
           </OfficePanel>
           <OfficePanel src={ASSETS.officeCenter}>
             {snap.chaparro === "hall" ? (
@@ -225,6 +225,8 @@ export function PlayScreen({
               )
             ) : null}
             {snap.fachero === "office" ? <Face who="fachero" className="face-office" /> : null}
+            <div className={`office-fan ${snap.powerOut ? "is-dead" : ""}`} aria-hidden="true" />
+            {!snap.powerOut ? <div className="office-bulb" aria-hidden="true" /> : null}
             <div className={`office-photo ${snap.officePhotoCreepy ? "is-creepy" : ""}`} aria-hidden="true">
               {snap.officePhotoCreepy ? <Eyes /> : null}
             </div>
@@ -233,7 +235,7 @@ export function PlayScreen({
             {snap.muecas === "mouth" && !snap.doorR ? (
               <Face who="muecas" className="face-vent face-vent-r" />
             ) : null}
-            {snap.doorR ? <div className="door-shut" /> : null}
+            {snap.doorR ? <div className="door-shut" key="door-r" /> : null}
           </OfficePanel>
         </div>
 
@@ -357,6 +359,7 @@ function CameraTablet({ engine, snap }: { engine: FnafEngine; snap: EngineSnap }
           {fachHere ? <Face who="fachero" className="face-cam" /> : null}
           {tortoloHere ? <Face who="tortolo" className="face-cam" /> : null}
           <div className="tablet-scan" />
+          <div key={snap.camId} className="cam-switch" aria-hidden="true" />
           <div className="tablet-static" style={{ opacity: 0.28 + snap.staticAmt * 0.72 }} />
           {snap.staticAmt > 0.42 ? (
             <div className="cam-tear" style={{ top: `${18 + ((snap.staticAmt * 57) % 62)}%` }} />
@@ -581,6 +584,7 @@ function Jumpscare({ who, engine }: { who: ThreatId; engine: FnafEngine }) {
           finishSoon(profile.errorMs);
         }}
       />
+      <img src={CHAR[who] ?? CHAR.gafas} alt="" className="jumpscare-peek" draggable={false} />
       <div className="jumpscare-flash" aria-hidden="true" />
       <p className="jumpscare-name">{CHAR_NAME[who]}</p>
     </div>
@@ -609,7 +613,13 @@ function EndCard({
   const portrait = killer ? CHAR[killer] : null;
   const name = killer ? CHAR_NAME[killer] : null;
   return (
-    <div className={`end-card ${killer ? "end-card-death" : ""}`}>
+    <div className={`end-card ${killer ? "end-card-death" : ""} ${title === "6 AM" ? "six-am" : ""}`}>
+      {title === "6 AM" ? (
+        <div className="six-clock" aria-hidden="true">
+          <span>5:59</span>
+          <span className="six-flip">6:00</span>
+        </div>
+      ) : null}
       <h2>{title}</h2>
       {portrait ? (
         <div className="death-portrait-wrap">
