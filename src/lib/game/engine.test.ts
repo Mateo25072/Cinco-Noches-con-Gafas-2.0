@@ -35,6 +35,16 @@ function makeEngine() {
 }
 
 describe("new night systems", () => {
+  it("keeps ten seconds of a single closed door below two percent battery", () => {
+    const engine = makeEngine();
+    engine.doorL = true;
+
+    for (let i = 0; i < 100; i += 1) engine.update(0.1);
+
+    assert.ok(engine.battery > 0.98);
+    assert.ok(engine.battery < 0.99);
+  });
+
   it("uses the kitchen lure to push Gafas back and applies its cost and cooldown", () => {
     const engine = makeEngine();
     engine.cameras = true;

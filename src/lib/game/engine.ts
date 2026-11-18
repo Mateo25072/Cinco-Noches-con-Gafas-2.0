@@ -580,7 +580,7 @@ export class FnafEngine {
     const sum = parts.reduce((a, b) => a + b, 0);
     const stack = n <= 1 ? 1 : 1 + 0.15 * (n - 1);
     const hourMul = 1 + this.hour * 0.025;
-    const perSec = sum * stack * hourMul;
+    const perSec = sum * stack * hourMul * 0.5;
     this.drain = perSec;
     this.battery = Math.max(0, this.battery - perSec * dt);
     if (this.battery <= 0) {

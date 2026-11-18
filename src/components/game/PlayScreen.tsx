@@ -356,7 +356,7 @@ function CameraTablet({ engine, snap }: { engine: FnafEngine; snap: EngineSnap }
             <button
               key={c.id}
               type="button"
-              className={`cam-btn ${snap.camId === c.id ? "is-on" : ""} ${snap.tortolo === c.id ? "is-warn" : ""}`}
+              className={`cam-btn ${snap.camId === c.id ? "is-on" : ""}`}
               onClick={() => engine.setCam(c.id as CamId)}
             >
               <span className="cam-num">{c.num}</span>
