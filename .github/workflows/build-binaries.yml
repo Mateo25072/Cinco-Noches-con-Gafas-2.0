@@ -62,11 +62,17 @@ jobs:
           TAG: ${{ inputs.release_tag }}
         run: |
           mv rel/app-debug.apk rel/Cinco-Noches-con-Gafas.apk
-          mv rel/*.exe rel/Cinco-Noches-con-Gafas-Windows.exe
-          gh release create "$TAG" rel/Cinco-Noches-con-Gafas-Windows.exe rel/Cinco-Noches-con-Gafas.apk \
+          for f in rel/*.exe; do
+            case "$f" in
+              *portable*) mv "$f" rel/Cinco-Noches-con-Gafas-Windows-portable.exe ;;
+              *setup*) mv "$f" rel/Cinco-Noches-con-Gafas-Windows-instalador.exe ;;
+            esac
+          done
+          ls -la rel
+          gh release create "$TAG" rel/*.exe rel/*.apk \
             --repo "$GITHUB_REPOSITORY" --target main \
             --title "Cinco Noches con Gafas $TAG" \
-            --notes "Versión con el menú animado (GIF). Windows: descarga el .exe y ábrelo (portable, no necesita instalación). Android: instala el .apk (versión de prueba)."
+            --notes "Versión con el menú animado (GIF). Windows: el .exe portable se abre sin instalar; el instalador crea acceso directo. Android: instala el .apk (versión de prueba)."
 
   publish:
     needs: [windows, android]
