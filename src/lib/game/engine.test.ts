@@ -142,4 +142,28 @@ describe("anti-overlap and team AI", () => {
     }
     assert.ok(["playing", "jumpscare", "sixam", "gameover"].includes(engine.phase as string));
   });
+
+  it("battery lasts a whole night when idle or on cameras, but not with both doors shut", () => {
+    const run = (setup: (e: ReturnType<typeof makeEngine>) => void) => {
+      const e = makeEngine();
+      e.battery = 1;
+      setup(e);
+      for (let i = 0; i < 6000; i += 1) {
+        if (e.powerOut) break;
+        e.update(0.05);
+      }
+      return e;
+    };
+    const idle = run(() => {});
+    assert.ok(idle.battery > 0.7, `idle left ${idle.battery}`);
+    const cams = run((e) => {
+      e.cameras = true;
+    });
+    assert.equal(cams.powerOut, false);
+    const doors = run((e) => {
+      e.doorL = true;
+      e.doorR = true;
+    });
+    assert.equal(doors.powerOut, true);
+  });
 });

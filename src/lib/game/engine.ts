@@ -500,12 +500,14 @@ export class FnafEngine {
   }
 
   private tickBattery(dt: number) {
-    let perSec = 0.011;
-    if (this.doorL) perSec += 0.012;
-    if (this.doorR) perSec += 0.012;
-    if (this.grate) perSec += 0.01;
-    if (this.cameras) perSec += 0.014;
-    if (this.flashlight) perSec += 0.016;
+    // Consumo por segundo (1 = 100 %). Una noche dura 300 s: en reposo se gasta ~18 %,
+    // y dejar todo encendido la agota en menos de la mitad de la noche.
+    let perSec = 0.0006;
+    if (this.doorL) perSec += 0.0022;
+    if (this.doorR) perSec += 0.0022;
+    if (this.grate) perSec += 0.0018;
+    if (this.cameras) perSec += 0.0025;
+    if (this.flashlight) perSec += 0.003;
     this.drain = perSec;
     this.battery = Math.max(0, this.battery - perSec * dt);
     if (this.battery <= 0) {
