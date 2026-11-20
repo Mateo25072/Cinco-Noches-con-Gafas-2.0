@@ -197,6 +197,16 @@ export function GameApp() {
           </FnafItem>
           <FnafItem onClick={toggleMute}>{muted ? "Activar sonido" : "Silenciar"}</FnafItem>
           <FnafItem
+            disabled={snap.beaten < 1 && !snap.night6Unlocked && !snap.customUnlocked && !snap.canContinue}
+            onClick={() => {
+              if (window.confirm("¿Borrar el progreso guardado? Las noches desbloqueadas se pierden.")) {
+                engine.resetProgress();
+              }
+            }}
+          >
+            Borrar progreso
+          </FnafItem>
+          <FnafItem
             onClick={() => {
               setHelp(false);
               setSettings(true);

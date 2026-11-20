@@ -50,8 +50,12 @@ export type SaveData = {
   version: 2;
   night: number;
   beaten: number;
+  /** Kept so older saves still unlock night 6. */
   night6: boolean;
+  night6Unlocked: boolean;
+  customUnlocked: boolean;
   custom20: boolean;
+  canContinue: boolean;
 };
 
 export type EngineSnap = {

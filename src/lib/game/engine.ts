@@ -1,5 +1,5 @@
 import { aiForNight, PHONE } from "./config.ts";
-import { loadSave, writeSave } from "./save.ts";
+import { clearSave, loadSave, writeSave } from "./save.ts";
 import type {
   AiLevels,
   CamId,
@@ -854,6 +854,7 @@ export class FnafEngine {
     this.canContinue = true;
     writeSave({
       beaten: this.beaten,
+      night6: this.night6Unlocked,
       night6Unlocked: this.night6Unlocked,
       customUnlocked: this.customUnlocked,
       custom20: this.custom20,
@@ -881,11 +882,26 @@ export class FnafEngine {
     this.canContinue = night >= 1 && night < 6;
     writeSave({
       beaten: this.beaten,
+      night6: this.night6Unlocked,
       night6Unlocked: this.night6Unlocked,
       customUnlocked: this.customUnlocked,
       custom20: this.custom20,
       canContinue: this.canContinue,
       night: this.canContinue ? night + 1 : night,
     });
+  }
+
+  resetProgress() {
+    clearSave();
+    this.beaten = 0;
+    this.night = 1;
+    this.night6Unlocked = false;
+    this.customUnlocked = false;
+    this.custom20 = false;
+    this.canContinue = false;
+    this.phase = "menu";
+    this.jumpscare = null;
+    this.deathTip = null;
+    this.emit();
   }
 }
