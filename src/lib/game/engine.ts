@@ -166,6 +166,45 @@ export class FnafEngine {
     };
   }
 
+  /** Clave barata para no redibujar si solo cambió un decimal. */
+  hudStamp(): string {
+    const q = (n: number, step: number) => Math.round(n / step);
+    return [
+      this.phase,
+      this.night,
+      this.hour,
+      q(this.battery, 0.01),
+      q(this.panic, 0.05),
+      q(this.drain, 0.005),
+      this.doorL ? 1 : 0,
+      this.doorR ? 1 : 0,
+      this.grate ? 1 : 0,
+      this.cameras ? 1 : 0,
+      this.camId,
+      this.flashlight ? 1 : 0,
+      this.powerOut ? 1 : 0,
+      q(this.generatorResetProgress, 0.15),
+      this.generatorResetUsed ? 1 : 0,
+      this.phoneOn ? 1 : 0,
+      this.phoneLine,
+      q(this.staticAmt, 0.1),
+      q(this.flicker, 0.1),
+      q(this.breathFog, 0.1),
+      q(this.blinded, 0.1),
+      q(this.lureCooldown, 0.5),
+      this.officePhotoCreepy ? 1 : 0,
+      this.gafas,
+      this.muecas,
+      this.chaparro,
+      this.fachero,
+      this.tortolo,
+      this.tortoloFlashes,
+      this.chapFlashes,
+      this.jumpscare ?? "",
+      this.deathTip ?? "",
+    ].join("|");
+  }
+
   goMenu() {
     this.phase = "menu";
     this.jumpscare = null;
