@@ -60,31 +60,36 @@ export function PlayScreen({
     let raf = 0;
     let last = performance.now();
     let acc = 0;
-    let emitAcc = 0;
+    let stamp = "";
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       if (typeof document !== "undefined" && document.hidden) {
         last = now;
+        acc = 0;
         return;
       }
-      const dt = Math.min(0.1, (now - last) / 1000);
+      const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const speed = 1.35;
       if (keys.current.left) lookRef.current = Math.max(-1, lookRef.current - speed * dt);
       if (keys.current.right) lookRef.current = Math.min(1, lookRef.current + speed * dt);
-      engine.setLook(lookRef.current);
+      if (lookRef.current !== engine.look) engine.setLook(lookRef.current);
       const pct = ((lookRef.current + 1) / 2) * 66.666;
       if (stripRef.current) {
         stripRef.current.style.transform = `translate3d(-${pct}%,0,0)`;
       }
       acc += dt;
-      while (acc >= 1 / 60) {
-        engine.update(1 / 60);
-        acc -= 1 / 60;
+      const step = 1 / 30;
+      let steps = 0;
+      while (acc >= step && steps < 3) {
+        engine.update(step);
+        acc -= step;
+        steps += 1;
       }
-      emitAcc += dt;
-      if (emitAcc >= 1 / 20) {
-        emitAcc = 0;
+      if (acc > step) acc = step;
+      const next = engine.hudStamp();
+      if (next !== stamp) {
+        stamp = next;
         engine.emit();
       }
     };
