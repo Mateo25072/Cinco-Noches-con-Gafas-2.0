@@ -16,17 +16,19 @@ export function GameApp() {
   const [reducedMotion, setReducedMotion] = useState<boolean>(() =>
     readPreference<boolean>("cncg-reduced-motion", false),
   );
+  const [boot, setBoot] = useState({ done: 0, total: 1, ready: false });
 
   useEffect(() => {
     audio.setMasterVolume(volume);
   }, [audio, volume]);
 
   useEffect(() => {
-    const srcs = [
+    const images = [
       ASSETS.officeCenter,
       ASSETS.officeLeft,
       ASSETS.officeRight,
       ASSETS.menu,
+      ASSETS.menuGif,
       ...Object.values(ASSETS.cams),
       ASSETS.gafas,
       ASSETS.mueca,
@@ -39,22 +41,57 @@ export function GameApp() {
       ASSETS.facheroJpg,
       ASSETS.tortoloJpg,
     ];
-    srcs.forEach((src) => {
+    const videos = [
+      ASSETS.gafasJump,
+      ASSETS.muecaJump,
+      ASSETS.chaparroJump,
+      ASSETS.facheroJump,
+      ASSETS.tortoloJump,
+    ];
+    const total = images.length + videos.length;
+    let done = 0;
+    let closed = false;
+    const paint = (ready: boolean) => {
+      if (closed) return;
+      setBoot({ done, total, ready });
+    };
+    let opened = false;
+    const tick = () => {
+      done += 1;
+      if (done >= total) {
+        opened = true;
+        paint(true);
+      } else if (!opened) paint(false);
+    };
+    paint(false);
+    const timer = window.setTimeout(() => {
+      opened = true;
+      done = total;
+      paint(true);
+    }, 8000);
+    for (const src of images) {
       const im = new Image();
+      im.onload = tick;
+      im.onerror = tick;
       im.src = src;
-    });
-    [ASSETS.gafasJump, ASSETS.muecaJump, ASSETS.chaparroJump, ASSETS.facheroJump, ASSETS.tortoloJump].forEach((src) => {
+    }
+    for (const src of videos) {
       const v = document.createElement("video");
       v.preload = "auto";
       v.muted = true;
       v.playsInline = true;
+      v.onloadeddata = tick;
+      v.onerror = tick;
       v.src = src;
-    });
+      v.load();
+    }
     const vis = () => {
       if (document.visibilityState === "visible") audio.unlock();
     };
     document.addEventListener("visibilitychange", vis);
     return () => {
+      closed = true;
+      window.clearTimeout(timer);
       document.removeEventListener("visibilitychange", vis);
       audio.dispose();
     };
@@ -76,6 +113,21 @@ export function GameApp() {
     setReducedMotion(value);
     storePreference("cncg-reduced-motion", value);
   };
+
+  if (!boot.ready && !paper && snap.phase === "menu") {
+    const pct = Math.min(100, Math.round((boot.done / Math.max(1, boot.total)) * 100));
+    return (
+      <div className="boot-screen">
+        <p className="boot-kicker">Cinco Noches con Gafas</p>
+        <h1>Cargando</h1>
+        <div className="boot-track" aria-hidden="true">
+          <div style={{ width: `${pct}%` }} />
+        </div>
+        <p className="boot-pct">{pct}%</p>
+        <p className="boot-hint">Oficina, cámaras y sustos</p>
+      </div>
+    );
+  }
 
   if (paper) {
     return (

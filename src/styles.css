@@ -677,3 +677,42 @@ button, input { font: inherit; }
   animation: peek-in 0.48s steps(3, end) forwards;
 }
 .phone p { margin: 0; max-width: 46ch; line-height: 1.35; }
+
+.boot-screen {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  background: #070605;
+  color: #f3ead7;
+  text-align: center;
+  padding: 24px;
+}
+.boot-kicker {
+  margin: 0;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: #c4b59a;
+}
+.boot-screen h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 8vw, 4rem);
+}
+.boot-track {
+  width: min(360px, 80vw);
+  height: 8px;
+  background: rgb(255 255 255 / 0.12);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.boot-track div {
+  height: 100%;
+  background: #d4a017;
+  transition: width 0.15s linear;
+}
+.boot-pct { margin: 0; font-family: var(--font-display); letter-spacing: 0.08em; }
+.boot-hint { margin: 0; color: #8d8272; font-size: 0.85rem; }
